@@ -1,0 +1,5 @@
+<h2>Добро пожаловать, {{ user.username }}!</h2>
+{% if user.userprofile.user_type == 'admin' %}
+    <a href="{% url 'add_user' %}">Добавить пользователя</a>
+{% endif %}
+<a href="/logout/">Выйти</a>

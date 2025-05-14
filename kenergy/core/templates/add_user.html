@@ -1,0 +1,11 @@
+<h2>Добавить нового пользователя</h2>
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <label for="user_type">Тип пользователя:</label>
+    <select name="user_type">
+        <option value="admin">Администратор</option>
+        <option value="regular">Обычный пользователь</option>
+    </select>
+    <button type="submit">Добавить</button>
+</form>
