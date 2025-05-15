@@ -1,6 +1,5 @@
 /* core/static/css/regulations.css */
 
-/* Общие стили */
 body {
     font-family: 'Arial', sans-serif;
     background: linear-gradient(135deg, #6e8efb, #a777e3); /* Градиентный фон */
@@ -11,24 +10,21 @@ body {
     height: 100vh;
 }
 
-/* Контейнер формы */
 .form-container {
     background-color: #ffffff;
     padding: 40px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    width: 800px; /* Широкий контейнер для двух таблиц */
+    width: 800px;
     text-align: center;
 }
 
-/* Заголовок */
 h2 {
     color: #333;
     margin-bottom: 20px;
     font-size: 24px;
 }
 
-/* Группа полей ввода */
 .form-group {
     margin-bottom: 15px;
     text-align: left;
@@ -55,7 +51,6 @@ select:focus {
     outline: none;
 }
 
-/* Кнопка */
 .btn {
     display: inline-block;
     padding: 10px 20px;
@@ -74,7 +69,6 @@ select:focus {
     background-color: #5a7de2;
 }
 
-/* Таблицы */
 .tables-container {
     display: flex;
     gap: 20px;

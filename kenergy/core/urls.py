@@ -7,7 +7,7 @@ urlpatterns = [
     path('add_user/', views.add_user, name='add_user'),
     path('edit_db/', views.edit_db, name='edit_db'),
     path('system_settings/', views.system_settings, name='system_settings'),
-    path('regulations/', views.regulations, name='regulations'),  # Маршрут для Регламентов
-    path('definition/', views.definition, name='definition'),      # Маршрут для Определения
-    path('defects/', views.defects, name='defects'),              # Маршрут для Дефектов
+    path('regulations/', views.regulations, name='regulations'),
+    path('definition/', views.definition, name='definition'),
+    path('defects/', views.defects, name='defects'),
 ]

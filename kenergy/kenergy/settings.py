@@ -27,9 +27,7 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-# Application definition
 INSTALLED_APPS = [
-    # Встроенные приложения Django
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -38,7 +36,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
 
     # Пользовательские приложения
-    'core',  # Добавьте это приложение
+    'core',
 ]
 
 MIDDLEWARE = [
@@ -111,9 +109,8 @@ USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/ 
-STATIC_URL = '/static/'  # Путь к статическим файлам
+STATIC_URL = '/static/'
 
-# Если вы хотите явно указать папки с статическими файлами
 STATICFILES_DIRS = [
-    BASE_DIR / 'core/static',  # Путь к статическим файлам в приложении core
+    BASE_DIR / 'core/static',
 ]

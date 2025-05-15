@@ -55,17 +55,20 @@ h2 {
     background-color: #5a7de2; /* Темно-синий при наведении */
 }
 
-/* Ссылка "Выйти" */
-.mt-3 {
-    margin-top: 20px;
-}
-
-.text-center a {
+/* Кнопка "Назад" */
+.btn-back {
     color: #6e8efb;
     text-decoration: none;
     font-size: 14px;
+    transition: color 0.3s ease;
 }
 
-.text-center a:hover {
+.btn-back:hover {
     text-decoration: underline;
+    color: #5a7de2;
+}
+
+
+.mt-3 {
+    margin-top: 20px;
 }

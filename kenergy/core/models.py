@@ -60,3 +60,10 @@ class FactsDetermination(models.Model):
 
     def __str__(self):
         return self.fact_name
+
+class Defect(models.Model):
+    object = models.ForeignKey(Object, on_delete=models.CASCADE)
+    name = models.CharField(max_length=255)
+
+    def __str__(self):
+        return self.name

@@ -1,20 +1,93 @@
-<!-- core/templates/core/definition.html -->
+<!-- core/templates/core/defects.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Определение</title>
+    <title>Дефекты</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/definition.css' %}">
+    <link rel="stylesheet" href="{% static 'css/defects.css' %}">
 </head>
 <body>
     <div class="form-container">
-        <h2>Определение</h2>
-        <p>Здесь будет интерфейс для определения параметров системы.</p>
-        <div class="mt-3 text-center">
-            <a href="{% url 'system_settings' %}" class="btn">Назад</a>
-        </div>
+        <h2>Дефекты</h2>
+
+        <!-- Форма выбора группы, подгруппы и объекта -->
+        <form method="get">
+            <div class="form-group">
+                <label for="group-select">Группа</label>
+                <select id="group-select" name="group" onchange="this.form.submit()">
+                    <option value="">Выберите группу</option>
+                    {% for group in groups %}
+                        <option value="{{ group.id_g }}" {% if group.id_g == selected_group_id %}selected{% endif %}>
+                            {{ group.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="subgroup-select">Подгруппа</label>
+                <select id="subgroup-select" name="subgroup" onchange="this.form.submit()">
+                    <option value="">Выберите подгруппу</option>
+                    {% for subgroup in subgroups %}
+                        <option value="{{ subgroup.id_g }}" {% if subgroup.id_g == selected_subgroup_id %}selected{% endif %}>
+                            {{ subgroup.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="object-select">Объект</label>
+                <select id="object-select" name="object" onchange="this.form.submit()">
+                    <option value="">Выберите объект</option>
+                    {% for obj in objects %}
+                        <option value="{{ obj.id_o }}" {% if obj.id_o == selected_object_id %}selected{% endif %}>
+                            {{ obj.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="button" onclick="location.href='{% url 'system_settings' %}'" class="btn">Назад</button>
+        </form>
+
+        <!-- Таблица дефектов -->
+        <form method="post">
+            {% csrf_token %}
+            <div class="tables-container">
+                <div class="left-table">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Дефект</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for defect in defects %}
+                                <tr>
+                                    <td>{{ defect.name }}</td>
+                                    <td>
+                                        <input type="checkbox" name="defect" value="{{ defect.id }}">
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td>Нет дефектов</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="right-table">
+                    <button type="submit" class="btn">Проверить пригодность</button>
+                    {% if verdict %}
+                        <p><strong>Вердикт:</strong> {{ verdict }}</p>
+                    {% else %}
+                        <p>Выберите дефекты для проверки пригодности.</p>
+                    {% endif %}
+                </div>
+            </div>
+        </form>
     </div>
 </body>
 </html>
