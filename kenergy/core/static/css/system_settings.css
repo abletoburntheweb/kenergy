@@ -1,0 +1,71 @@
+/* core/static/css/system_settings.css */
+
+/* Общие стили */
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #6e8efb, #a777e3); /* Градиентный фон */
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+/* Контейнер формы */
+.form-container {
+    background-color: #ffffff;
+    padding: 40px;
+    border-radius: 10px;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    width: 350px;
+    text-align: center;
+}
+
+/* Заголовок */
+h2 {
+    color: #333;
+    margin-bottom: 20px;
+    font-size: 24px;
+}
+
+/* Группа кнопок */
+.button-group {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Кнопки */
+.btn {
+    display: inline-block;
+    width: 100%;
+    padding: 12px;
+    font-size: 16px;
+    text-align: center;
+    text-decoration: none;
+    color: #fff;
+    background-color: #6e8efb; /* Синий цвет для кнопок */
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.btn:hover {
+    background-color: #5a7de2; /* Темно-синий при наведении */
+}
+
+/* Ссылка "Выйти" */
+.mt-3 {
+    margin-top: 20px;
+}
+
+.text-center a {
+    color: #6e8efb;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.text-center a:hover {
+    text-decoration: underline;
+}

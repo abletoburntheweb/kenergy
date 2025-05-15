@@ -1,0 +1,21 @@
+<!-- core/templates/core/edit_db.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Редактировать БД</title>
+    <!-- Подключение CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/edit_db.css' %}">
+</head>
+<body>
+    <div class="form-container">
+        <h2>Редактировать БД</h2>
+        <p>Здесь будет интерфейс для редактирования базы данных.</p>
+        <div class="mt-3 text-center">
+            <a href="{% url 'admin_panel' %}" class="btn">Назад в панель</a>
+        </div>
+    </div>
+</body>
+</html>

@@ -1,0 +1,91 @@
+<!-- core/templates/core/regulations.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Регламенты</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/regulations.css' %}">
+</head>
+<body>
+    <div class="form-container">
+        <h2>Регламенты</h2>
+
+        <!-- Форма выбора категории, группы и объекта -->
+        <form method="get">
+            <div class="form-group">
+                <label for="inventory-select">Категория</label>
+                <select id="inventory-select" name="inventory" onchange="this.form.submit()">
+                    <option value="">Выберите категорию</option>
+                    {% for inventory in inventories %}
+                        <option value="{{ inventory.id_i }}" {% if inventory.id_i == selected_inventory_id %}selected{% endif %}>
+                            {{ inventory.название }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="group-select">Группа</label>
+                <select id="group-select" name="group" onchange="this.form.submit()">
+                    <option value="">Выберите группу</option>
+                    {% for group in groups %}
+                        <option value="{{ group.id_g }}" {% if group.id_g == selected_group_id %}selected{% endif %}>
+                            {{ group.название }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <button type="button" onclick="location.href='{% url 'system_settings' %}'" class="btn">Назад</button>
+        </form>
+
+        <!-- Таблицы объектов и стандартов -->
+        <div class="tables-container">
+            <div class="left-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Объект</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for obj in objects %}
+                            <tr>
+                                <td>
+                                    <a href="?inventory={{ selected_inventory_id }}&group={{ selected_group_id }}&object={{ obj.id_o }}">
+                                        {{ obj.название }}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td>Нет объектов</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="right-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Стандарт</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for standard in standards %}
+                            <tr>
+                                <td>{{ standard.факт }}</td>
+                            </tr>
+                        {% empty %}
+                            <tr>
+                                <td>Нет стандартов</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

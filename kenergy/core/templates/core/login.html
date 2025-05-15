@@ -1,0 +1,38 @@
+<!-- core/templates/core/login.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Авторизация</title>
+    <!-- Подключение CSS -->
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/login.css' %}">
+</head>
+<body>
+    <div class="login-container">
+        <h2>Авторизация</h2>
+
+        <!-- Отображение ошибок -->
+        {% if form.errors %}
+            <div class="alert">
+                <p>Неправильное имя пользователя или пароль. Пожалуйста, попробуйте снова.</p>
+            </div>
+        {% endif %}
+
+        <!-- Форма входа -->
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
+                {{ form.username }}
+            </div>
+            <div class="form-group">
+                <label for="{{ form.password.id_for_label }}">Пароль</label>
+                {{ form.password }}
+            </div>
+            <button type="submit">Войти</button>
+        </form>
+    </div>
+</body>
+</html>
