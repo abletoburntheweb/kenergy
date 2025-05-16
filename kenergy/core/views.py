@@ -1,17 +1,19 @@
 # core/views.py
+import logging
 
 from django.contrib.auth.forms import AuthenticationForm
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from .forms import RegisterForm
-from .models import FactsDetermination, Object, Groups, Inventory, Defect
+from .models import FactsDetermination, Object, Groups, Inventory, FactsDefects
 
-
+logger = logging.getLogger(__name__)
 # Главная страница (админская панель)
 @login_required
 def admin_panel(request):
     return render(request, 'core/admin_panel.html')
+
 
 # Авторизация пользователя
 def user_login(request):
@@ -21,29 +23,46 @@ def user_login(request):
             user = form.get_user()
             login(request, user)
             if user.is_staff:  # Если пользователь — администратор
+                logger.info(f"Администратор {user.username} вошел в систему.")
                 return redirect('admin_panel')
             else:  # Если пользователь — обычный пользователь
+                logger.info(f"Пользователь {user.username} вошел в систему.")
                 return redirect('system_settings')
     else:
         form = AuthenticationForm()
     return render(request, 'core/login.html', {'form': form})
 
+
 # Добавление нового пользователя администратором
 @login_required
 def add_user(request):
-    # Проверка прав доступа: только администраторы могут добавлять пользователей
     if not request.user.is_staff:
+        logger.warning(
+            f"Пользователь {request.user.username} попытался добавить нового пользователя, но не имеет прав."
+        )
         return redirect('admin_panel')
 
     if request.method == 'POST':
         form = RegisterForm(request.POST)
         if form.is_valid():
-            user = form.save(commit=False)
-            user.is_staff = form.cleaned_data['is_admin']  # Установка права администратора
-            user.save()
-            return redirect('admin_panel')  # Перенаправление на админскую панель
+            try:
+                user = form.save()
+                logger.info(f"Администратор {request.user.username} создал пользователя {user.username}.")
+                return redirect('admin_panel')
+            except Exception as e:
+                logger.error(f"Ошибка при создании пользователя: {e}")
+                return render(request, 'core/add_user.html', {
+                    'form': form,
+                    'error_message': 'Произошла ошибка при создании пользователя.'
+                })
+        else:
+            # Логируем ошибки валидации
+            logger.error(f"Ошибка валидации формы: {form.errors}")
+            # Передаем форму с ошибками обратно в шаблон
+            return render(request, 'core/add_user.html', {'form': form})
     else:
         form = RegisterForm()
+
     return render(request, 'core/add_user.html', {'form': form})
 
 # Редактирование базы данных
@@ -88,7 +107,7 @@ def definition(request):
 
     # Если выбрана подгруппа, получаем её факты
     selected_subgroup_id = request.GET.get('subgroup')
-    facts = FactsDetermination.objects.filter(id_o__id_g=selected_subgroup_id) if selected_subgroup_id else []
+    facts = FactsDetermination.objects.filter(id_o__id_g=selected_subgroup_id).select_related('id_o') if selected_subgroup_id else []
 
     # Если выбран факт, определяем объект
     selected_fact_ids = request.GET.getlist('fact')  # Получаем список выбранных фактов
@@ -106,6 +125,7 @@ def definition(request):
     return render(request, 'core/definition.html', context)
 
 @login_required
+@login_required
 def defects(request):
     # Получаем все группы
     groups = Groups.objects.all()
@@ -118,9 +138,9 @@ def defects(request):
     selected_subgroup_id = request.GET.get('subgroup')
     objects = Object.objects.filter(id_g=selected_subgroup_id) if selected_subgroup_id else []
 
-    # Если выбран объект, получаем его дефекты
+    # Если выбран объект, получаем его дефекты из модели FactsDefects
     selected_object_id = request.GET.get('object')
-    defects = Defect.objects.filter(object_id=selected_object_id) if selected_object_id else []
+    defects = FactsDefects.objects.filter(id_o=selected_object_id).select_related('id_o') if selected_object_id else []
 
     # Если нажата кнопка "Проверить пригодность"
     if request.method == 'POST':

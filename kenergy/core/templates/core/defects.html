@@ -65,9 +65,9 @@
                         <tbody>
                             {% for defect in defects %}
                                 <tr>
-                                    <td>{{ defect.name }}</td>
+                                    <td>{{ defect.fact }}</td>
                                     <td>
-                                        <input type="checkbox" name="defect" value="{{ defect.id }}">
+                                        <input type="checkbox" name="defect" value="{{ defect.id_def }}">
                                     </td>
                                 </tr>
                             {% empty %}
