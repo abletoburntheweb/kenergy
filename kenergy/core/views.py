@@ -113,18 +113,23 @@ def definition(request):
     selected_fact_ids = request.GET.getlist('fact')  # Получаем список выбранных фактов
     objects = Object.objects.filter(factsdetermination__id_d__in=selected_fact_ids).distinct() if selected_fact_ids else []
 
-    context = {
+    # Если нажата кнопка "Определить"
+    verdict = None
+    if request.method == 'POST':
+        selected_fact_ids = request.POST.getlist('fact')  # Получаем список выбранных фактов
+        objects = Object.objects.filter(factsdetermination__id_d__in=selected_fact_ids).distinct()
+        verdict = "Объект определен." if objects else "Не удалось определить объект."
+
+    return render(request, 'core/definition.html', {
         'groups': groups,
         'subgroups': subgroups,
         'facts': facts,
         'objects': objects,
+        'verdict': verdict,
         'selected_group_id': int(selected_group_id) if selected_group_id else None,
         'selected_subgroup_id': int(selected_subgroup_id) if selected_subgroup_id else None,
-    }
+    })
 
-    return render(request, 'core/definition.html', context)
-
-@login_required
 @login_required
 def defects(request):
     # Получаем все группы
