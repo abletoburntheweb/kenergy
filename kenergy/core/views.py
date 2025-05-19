@@ -67,17 +67,16 @@ def add_user(request):
 @login_required
 def view_users(request):
     if not request.user.is_staff:
-        return redirect('system_settings')
+        return redirect('system')
 
     query = request.GET.get('q')
 
     if query:
         users = User.objects.filter(
-            Q(username__icontains=query) |
-            Q(id__icontains=query)
-        )
+            Q(username__icontains=query)
+        ).order_by('id')
     else:
-        users = User.objects.all()
+        users = User.objects.all().order_by('id')
 
     return render(request, 'core/view_users.html', {'users': users})
 
