@@ -12,34 +12,36 @@
     <div class="form-container">
         <h2>Определение</h2>
 
-        <!-- Форма выбора группы и подгруппы -->
         <form method="get">
             <div class="form-group">
-                <label for="group-select">Группа</label>
-                <select id="group-select" name="group" onchange="this.form.submit()">
-                    <option value="">Выберите группу</option>
-                    {% for group in groups %}
-                        <option value="{{ group.id_g }}" {% if group.id_g == selected_group_id %}selected{% endif %}>
-                            {{ group.name }}
+                <label for="inventory-select">Основная группа</label>
+                <select id="inventory-select" name="inventory" onchange="this.form.submit()">
+                    <option value="">Выберите основную группу</option>
+                    {% for inventory in inventories %}
+                        <option value="{{ inventory.id_i }}" {% if inventory.id_i == selected_inventory_id %}selected{% endif %}>
+                            {{ inventory.name }}
                         </option>
                     {% endfor %}
                 </select>
             </div>
-            <div class="form-group">
-                <label for="subgroup-select">Подгруппа</label>
-                <select id="subgroup-select" name="subgroup" onchange="this.form.submit()">
-                    <option value="">Выберите подгруппу</option>
-                    {% for subgroup in subgroups %}
-                        <option value="{{ subgroup.id_g }}" {% if subgroup.id_g == selected_subgroup_id %}selected{% endif %}>
-                            {{ subgroup.name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
+
+            {% if groups %}
+                <div class="form-group">
+                    <label for="group-select">Подгруппа</label>
+                    <select id="group-select" name="group" onchange="this.form.submit()">
+                        <option value="">Выберите подгруппу</option>
+                        {% for group in groups %}
+                            <option value="{{ group.id_g }}" {% if group.id_g == selected_group_id %}selected{% endif %}>
+                                {{ group.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
+
             <button type="button" onclick="location.href='{% url 'system_settings' %}'" class="btn">Назад</button>
         </form>
 
-        <!-- Таблица фактов -->
         <div class="tables-container">
             <div class="left-table">
                 <form method="post">
@@ -66,10 +68,10 @@
                             {% endfor %}
                         </tbody>
                     </table>
-                    <!-- Кнопка "Определить" -->
                     <button type="submit" class="btn">Определить</button>
                 </form>
             </div>
+
             <div class="right-table">
                 {% if objects %}
                     <p><strong>Определен объект:</strong></p>

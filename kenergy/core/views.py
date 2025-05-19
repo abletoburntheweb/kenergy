@@ -11,8 +11,8 @@ from .models import FactsDetermination, Object, Groups, Inventory, FactsDefects
 logger = logging.getLogger(__name__)
 @login_required
 def admin_panel(request):
-    if not request.user.is_staff:  # Если пользователь не администратор
-        return redirect('system_settings')  # Перенаправляем на страницу "Система"
+    if not request.user.is_staff:
+        return redirect('system_settings')
     return render(request, 'core/admin_panel.html')
 
 
@@ -24,12 +24,12 @@ def user_login(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            if user.is_staff:  # Если пользователь — администратор
+            if user.is_staff:
                 logger.info(f"Администратор {user.username} вошел в систему.")
-                return redirect('admin_panel')  # Перенаправляем на административную панель
-            else:  # Если пользователь — обычный пользователь
+                return redirect('admin_panel')
+            else:
                 logger.info(f"Пользователь {user.username} вошел в систему.")
-                return redirect('system_settings')  # Перенаправляем на страницу "Система"
+                return redirect('system_settings')
     else:
         form = AuthenticationForm()
     return render(request, 'core/login.html', {'form': form})
@@ -37,11 +37,11 @@ def user_login(request):
 
 @login_required
 def add_user(request):
-    if not request.user.is_staff:  # Если пользователь не администратор
+    if not request.user.is_staff:
         logger.warning(
             f"Пользователь {request.user.username} попытался добавить нового пользователя, но не имеет прав."
         )
-        return redirect('system_settings')  # Перенаправляем на страницу "Система"
+        return redirect('system_settings')
 
     if request.method == 'POST':
         form = RegisterForm(request.POST)
@@ -66,8 +66,8 @@ def add_user(request):
 
 @login_required
 def edit_db(request):
-    if not request.user.is_staff:  # Если пользователь не администратор
-        return redirect('system_settings')  # Перенаправляем на страницу "Система"
+    if not request.user.is_staff:
+        return redirect('system_settings')
 
     context = {
         'message': 'Здесь будет интерфейс для редактирования базы данных.'
@@ -84,67 +84,68 @@ def regulations(request):
 
 @login_required
 def definition(request):
-    groups = Groups.objects.all()
+    inventories = Inventory.objects.all()
+
+    selected_inventory_id = request.GET.get('inventory')
+    groups = Groups.objects.filter(id_i=selected_inventory_id) if selected_inventory_id else []
 
     selected_group_id = request.GET.get('group')
-    subgroups = Groups.objects.filter(id_i=selected_group_id) if selected_group_id else []
-
-    selected_subgroup_id = request.GET.get('subgroup')
-    facts = FactsDetermination.objects.filter(id_o__id_g=selected_subgroup_id).select_related('id_o') if selected_subgroup_id else []
+    facts = FactsDetermination.objects.filter(id_o__id_g=selected_group_id).select_related('id_o') if selected_group_id else []
 
     selected_fact_ids = request.GET.getlist('fact')
     objects = Object.objects.filter(factsdetermination__id_d__in=selected_fact_ids).distinct() if selected_fact_ids else []
 
     verdict = None
     if request.method == 'POST':
-        selected_fact_ids = request.POST.getlist('fact')
+        selected_fact_ids = request.POST.getlist('fact') 
         objects = Object.objects.filter(factsdetermination__id_d__in=selected_fact_ids).distinct()
         verdict = "Объект определен." if objects else "Не удалось определить объект."
 
     return render(request, 'core/definition.html', {
+        'inventories': inventories,
         'groups': groups,
-        'subgroups': subgroups,
         'facts': facts,
         'objects': objects,
         'verdict': verdict,
+        'selected_inventory_id': int(selected_inventory_id) if selected_inventory_id else None,
         'selected_group_id': int(selected_group_id) if selected_group_id else None,
-        'selected_subgroup_id': int(selected_subgroup_id) if selected_subgroup_id else None,
     })
 
 @login_required
 def defects(request):
-    groups = Groups.objects.all()
+    inventories = Inventory.objects.all()
+
+    selected_inventory_id = request.GET.get('inventory')
+    groups = Groups.objects.filter(id_i=selected_inventory_id) if selected_inventory_id else []
 
     selected_group_id = request.GET.get('group')
-    subgroups = Groups.objects.filter(id_i=selected_group_id) if selected_group_id else []
-
-    selected_subgroup_id = request.GET.get('subgroup')
-    objects = Object.objects.filter(id_g=selected_subgroup_id) if selected_subgroup_id else []
+    objects = Object.objects.filter(id_g=selected_group_id) if selected_group_id else []
 
     selected_object_id = request.GET.get('object')
     defects = FactsDefects.objects.filter(id_o=selected_object_id).select_related('id_o') if selected_object_id else []
 
+    verdict = None
     if request.method == 'POST':
         selected_defect_ids = request.POST.getlist('defect')
         verdict = "Пригоден" if not selected_defect_ids else "Не пригоден"
         return render(request, 'core/defects.html', {
+            'inventories': inventories,
             'groups': groups,
-            'subgroups': subgroups,
             'objects': objects,
             'defects': defects,
             'verdict': verdict,
+            'selected_inventory_id': int(selected_inventory_id) if selected_inventory_id else None,
             'selected_group_id': int(selected_group_id) if selected_group_id else None,
-            'selected_subgroup_id': int(selected_subgroup_id) if selected_subgroup_id else None,
             'selected_object_id': int(selected_object_id) if selected_object_id else None,
         })
 
     return render(request, 'core/defects.html', {
+        'inventories': inventories,
         'groups': groups,
-        'subgroups': subgroups,
         'objects': objects,
         'defects': defects,
-        'verdict': None,
+        'verdict': verdict,
+        'selected_inventory_id': int(selected_inventory_id) if selected_inventory_id else None,
         'selected_group_id': int(selected_group_id) if selected_group_id else None,
-        'selected_subgroup_id': int(selected_subgroup_id) if selected_subgroup_id else None,
         'selected_object_id': int(selected_object_id) if selected_object_id else None,
     })

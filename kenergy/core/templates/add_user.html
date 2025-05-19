@@ -5,7 +5,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Добавить нового пользователя</title>
-    <!-- Подключение CSS -->
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/add_user.css' %}">
 </head>
@@ -13,7 +12,6 @@
     <div class="form-container">
         <h2>Добавить нового пользователя</h2>
 
-        <!-- Отображение общих ошибок формы -->
         {% if form.non_field_errors %}
             <div class="alert">
                 <p>Общие ошибки:</p>
@@ -25,11 +23,9 @@
             </div>
         {% endif %}
 
-        <!-- Форма добавления пользователя -->
         <form method="post">
             {% csrf_token %}
 
-            <!-- Имя пользователя -->
             <div class="form-group">
                 <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
                 {{ form.username }}
@@ -44,7 +40,6 @@
                 {% endif %}
             </div>
 
-            <!-- Пароль -->
             <div class="form-group">
                 <label for="{{ form.password1.id_for_label }}">Пароль</label>
                 {{ form.password1 }}
@@ -59,7 +54,6 @@
                 {% endif %}
             </div>
 
-            <!-- Подтверждение пароля -->
             <div class="form-group">
                 <label for="{{ form.password2.id_for_label }}">Подтверждение пароля</label>
                 {{ form.password2 }}
@@ -73,8 +67,6 @@
                     </div>
                 {% endif %}
             </div>
-
-            <!-- Тип пользователя -->
             <div class="form-group">
                 <label for="user_type">Тип пользователя</label>
                 <select name="user_type" id="user_type">
