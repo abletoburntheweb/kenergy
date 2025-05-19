@@ -1,9 +1,8 @@
 /* core/static/css/admin_panel.css */
 
-/* Общие стили */
 body {
     font-family: 'Arial', sans-serif;
-    background: linear-gradient(135deg, #6e8efb, #a777e3); /* Градиентный фон */
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
     margin: 0;
     display: flex;
     justify-content: center;
@@ -11,7 +10,6 @@ body {
     height: 100vh;
 }
 
-/* Контейнер формы */
 .form-container {
     background-color: #ffffff;
     padding: 40px;
@@ -21,21 +19,18 @@ body {
     text-align: center;
 }
 
-/* Заголовок */
 h2 {
     color: #333;
     margin-bottom: 20px;
     font-size: 24px;
 }
 
-/* Группа кнопок */
 .button-group {
     display: flex;
     flex-direction: column;
     gap: 10px;
 }
 
-/* Кнопки */
 .btn {
     display: inline-block;
     width: 100%;
@@ -44,7 +39,7 @@ h2 {
     text-align: center;
     text-decoration: none;
     color: #fff;
-    background-color: #6e8efb; /* Синий цвет для кнопок */
+    background-color: #6e8efb;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -52,10 +47,9 @@ h2 {
 }
 
 .btn:hover {
-    background-color: #5a7de2; /* Темно-синий при наведении */
+    background-color: #5a7de2;
 }
 
-/* Ссылка "Выйти" */
 .mt-3 {
     margin-top: 20px;
 }

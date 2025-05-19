@@ -9,20 +9,18 @@ from .forms import RegisterForm
 from .models import FactsDetermination, Object, Groups, Inventory, FactsDefects
 
 logger = logging.getLogger(__name__)
-# Главная страница (админская панель)
 @login_required
 def admin_panel(request):
     return render(request, 'core/admin_panel.html')
 
 
-# Авторизация пользователя
 def user_login(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            if user.is_staff:  # Если пользователь — администратор
+            if user.is_staff:
                 logger.info(f"Администратор {user.username} вошел в систему.")
                 return redirect('admin_panel')
             else:  # Если пользователь — обычный пользователь
@@ -33,7 +31,6 @@ def user_login(request):
     return render(request, 'core/login.html', {'form': form})
 
 
-# Добавление нового пользователя администратором
 @login_required
 def add_user(request):
     if not request.user.is_staff:
@@ -56,22 +53,15 @@ def add_user(request):
                     'error_message': 'Произошла ошибка при создании пользователя.'
                 })
         else:
-            # Логируем ошибки валидации
             logger.error(f"Ошибка валидации формы: {form.errors}")
-            # Передаем форму с ошибками обратно в шаблон
             return render(request, 'core/add_user.html', {'form': form})
     else:
         form = RegisterForm()
 
     return render(request, 'core/add_user.html', {'form': form})
 
-# Редактирование базы данных
-@login_required
-# core/views.py
-
 @login_required
 def edit_db(request):
-    # Проверка прав доступа: только администраторы могут редактировать БД
     if not request.user.is_staff:
         return redirect('admin_panel')
 
@@ -80,17 +70,9 @@ def edit_db(request):
     }
     return render(request, 'core/edit_db.html', context)
 
-# Настройки системы
 @login_required
 def system_settings(request):
-    # Проверка прав доступа: только администраторы могут изменять настройки системы
-    if not request.user.is_staff:
-        return redirect('admin_panel')
-
-    context = {
-        'message': 'Здесь будут настройки системы.'
-    }
-    return render(request, 'core/system_settings.html', context)
+    return render(request, 'core/system_settings.html')
 
 @login_required
 def regulations(request):
@@ -98,25 +80,20 @@ def regulations(request):
 
 @login_required
 def definition(request):
-    # Получаем все группы
     groups = Groups.objects.all()
 
-    # Если выбрана группа, получаем её подгруппы
     selected_group_id = request.GET.get('group')
     subgroups = Groups.objects.filter(id_i=selected_group_id) if selected_group_id else []
 
-    # Если выбрана подгруппа, получаем её факты
     selected_subgroup_id = request.GET.get('subgroup')
     facts = FactsDetermination.objects.filter(id_o__id_g=selected_subgroup_id).select_related('id_o') if selected_subgroup_id else []
 
-    # Если выбран факт, определяем объект
-    selected_fact_ids = request.GET.getlist('fact')  # Получаем список выбранных фактов
+    selected_fact_ids = request.GET.getlist('fact')
     objects = Object.objects.filter(factsdetermination__id_d__in=selected_fact_ids).distinct() if selected_fact_ids else []
 
-    # Если нажата кнопка "Определить"
     verdict = None
     if request.method == 'POST':
-        selected_fact_ids = request.POST.getlist('fact')  # Получаем список выбранных фактов
+        selected_fact_ids = request.POST.getlist('fact')
         objects = Object.objects.filter(factsdetermination__id_d__in=selected_fact_ids).distinct()
         verdict = "Объект определен." if objects else "Не удалось определить объект."
 
@@ -132,24 +109,19 @@ def definition(request):
 
 @login_required
 def defects(request):
-    # Получаем все группы
     groups = Groups.objects.all()
 
-    # Если выбрана группа, получаем её подгруппы
     selected_group_id = request.GET.get('group')
     subgroups = Groups.objects.filter(id_i=selected_group_id) if selected_group_id else []
 
-    # Если выбрана подгруппа, получаем её объекты
     selected_subgroup_id = request.GET.get('subgroup')
     objects = Object.objects.filter(id_g=selected_subgroup_id) if selected_subgroup_id else []
 
-    # Если выбран объект, получаем его дефекты из модели FactsDefects
     selected_object_id = request.GET.get('object')
     defects = FactsDefects.objects.filter(id_o=selected_object_id).select_related('id_o') if selected_object_id else []
 
-    # Если нажата кнопка "Проверить пригодность"
     if request.method == 'POST':
-        selected_defect_ids = request.POST.getlist('defect')  # Получаем список выбранных дефектов
+        selected_defect_ids = request.POST.getlist('defect')
         verdict = "Пригоден" if not selected_defect_ids else "Не пригоден"
         return render(request, 'core/defects.html', {
             'groups': groups,
@@ -162,7 +134,6 @@ def defects(request):
             'selected_object_id': int(selected_object_id) if selected_object_id else None,
         })
 
-    # Если GET-запрос, отображаем форму
     return render(request, 'core/defects.html', {
         'groups': groups,
         'subgroups': subgroups,

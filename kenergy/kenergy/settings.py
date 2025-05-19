@@ -20,7 +20,6 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
 
-    # Пользовательские приложения
     'core',
 ]
 
@@ -39,7 +38,7 @@ ROOT_URLCONF = 'kenergy.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')],  # Укажите путь к папке шаблонов
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -61,8 +60,8 @@ DATABASES = {
         'NAME': 'kenergy',
         'USER': 'postgres',
         'PASSWORD': '1221',
-        'HOST': 'localhost',  # или IP-адрес сервера
-        'PORT': '5432',       # порт PostgreSQL (по умолчанию 5432)
+        'HOST': 'localhost',
+        'PORT': '5432',
     }
 }
 
@@ -74,7 +73,7 @@ AUTH_PASSWORD_VALIDATORS = [
     {
         'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
         'OPTIONS': {
-            'min_length': 8,  # Минимальная длина пароля
+            'min_length': 8,
         }
     },
     {
@@ -95,5 +94,5 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 STATIC_URL = '/static/'
 STATICFILES_DIRS = [
-    BASE_DIR / 'core/static',  # Добавьте путь к статическим файлам приложения
+    BASE_DIR / 'core/static',
 ]
