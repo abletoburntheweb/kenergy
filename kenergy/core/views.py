@@ -11,8 +11,12 @@ from .models import FactsDetermination, Object, Groups, Inventory, FactsDefects
 logger = logging.getLogger(__name__)
 @login_required
 def admin_panel(request):
+    if not request.user.is_staff:  # Если пользователь не администратор
+        return redirect('system_settings')  # Перенаправляем на страницу "Система"
     return render(request, 'core/admin_panel.html')
 
+
+# core/views.py
 
 def user_login(request):
     if request.method == 'POST':
@@ -20,12 +24,12 @@ def user_login(request):
         if form.is_valid():
             user = form.get_user()
             login(request, user)
-            if user.is_staff:
+            if user.is_staff:  # Если пользователь — администратор
                 logger.info(f"Администратор {user.username} вошел в систему.")
-                return redirect('admin_panel')
+                return redirect('admin_panel')  # Перенаправляем на административную панель
             else:  # Если пользователь — обычный пользователь
                 logger.info(f"Пользователь {user.username} вошел в систему.")
-                return redirect('system_settings')
+                return redirect('system_settings')  # Перенаправляем на страницу "Система"
     else:
         form = AuthenticationForm()
     return render(request, 'core/login.html', {'form': form})
@@ -33,11 +37,11 @@ def user_login(request):
 
 @login_required
 def add_user(request):
-    if not request.user.is_staff:
+    if not request.user.is_staff:  # Если пользователь не администратор
         logger.warning(
             f"Пользователь {request.user.username} попытался добавить нового пользователя, но не имеет прав."
         )
-        return redirect('admin_panel')
+        return redirect('system_settings')  # Перенаправляем на страницу "Система"
 
     if request.method == 'POST':
         form = RegisterForm(request.POST)
@@ -62,8 +66,8 @@ def add_user(request):
 
 @login_required
 def edit_db(request):
-    if not request.user.is_staff:
-        return redirect('admin_panel')
+    if not request.user.is_staff:  # Если пользователь не администратор
+        return redirect('system_settings')  # Перенаправляем на страницу "Система"
 
     context = {
         'message': 'Здесь будет интерфейс для редактирования базы данных.'
