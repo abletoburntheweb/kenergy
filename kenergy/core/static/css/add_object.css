@@ -1,4 +1,4 @@
-/* core/static/css/edit_db.css */
+/* core/static/css/add_object.css */
 
 body {
     font-family: 'Arial', sans-serif;
@@ -15,7 +15,7 @@ body {
     padding: 40px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    width: 350px;
+    width: 400px;
     text-align: center;
 }
 
@@ -25,21 +25,15 @@ h2 {
     font-size: 24px;
 }
 
-.button-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+form {
+    text-align: left;
 }
 
 .btn {
     display: inline-block;
-    width: 100%;
-    padding: 12px;
-    font-size: 16px;
-    text-align: center;
-    text-decoration: none;
-    color: #fff;
+    padding: 10px 20px;
     background-color: #6e8efb;
+    color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
@@ -58,8 +52,4 @@ h2 {
 
 .btn-back:hover {
     text-decoration: underline;
-}
-
-.mt-3 {
-    margin-top: 20px;
 }

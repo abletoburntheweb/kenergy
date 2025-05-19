@@ -1,4 +1,4 @@
-/* core/static/css/edit_db.css */
+/* core/static/css/view_users.css */
 
 body {
     font-family: 'Arial', sans-serif;
@@ -15,7 +15,7 @@ body {
     padding: 40px;
     border-radius: 10px;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
-    width: 350px;
+    width: 600px;
     text-align: center;
 }
 
@@ -25,29 +25,20 @@ h2 {
     font-size: 24px;
 }
 
-.button-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-.btn {
-    display: inline-block;
+table {
     width: 100%;
-    padding: 12px;
-    font-size: 16px;
-    text-align: center;
-    text-decoration: none;
-    color: #fff;
-    background-color: #6e8efb;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
+    border-collapse: collapse;
+    margin-bottom: 20px;
 }
 
-.btn:hover {
-    background-color: #5a7de2;
+table th, table td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+table th {
+    background-color: #f4f4f4;
 }
 
 .btn-back {
@@ -58,8 +49,4 @@ h2 {
 
 .btn-back:hover {
     text-decoration: underline;
-}
-
-.mt-3 {
-    margin-top: 20px;
 }

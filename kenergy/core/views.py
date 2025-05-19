@@ -2,10 +2,12 @@
 import logging
 
 from django.contrib.auth.forms import AuthenticationForm
+from django.contrib.auth.models import User
+from django.db.models import Q
 from django.shortcuts import render, redirect
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
-from .forms import RegisterForm
+from .forms import RegisterForm, ObjectForm
 from .models import FactsDetermination, Object, Groups, Inventory, FactsDefects
 
 logger = logging.getLogger(__name__)
@@ -15,8 +17,6 @@ def admin_panel(request):
         return redirect('system_settings')
     return render(request, 'core/admin_panel.html')
 
-
-# core/views.py
 
 def user_login(request):
     if request.method == 'POST':
@@ -65,15 +65,46 @@ def add_user(request):
     return render(request, 'core/add_user.html', {'form': form})
 
 @login_required
+def view_users(request):
+    if not request.user.is_staff:
+        return redirect('system_settings')
+
+    query = request.GET.get('q')
+
+    if query:
+        users = User.objects.filter(
+            Q(username__icontains=query) |
+            Q(id__icontains=query)
+        )
+    else:
+        users = User.objects.all()
+
+    return render(request, 'core/view_users.html', {'users': users})
+
+@login_required
 def edit_db(request):
     if not request.user.is_staff:
         return redirect('system_settings')
 
     context = {
-        'message': 'Здесь будет интерфейс для редактирования базы данных.'
+        'message': 'Здесь вы можете управлять базой данных.'
     }
     return render(request, 'core/edit_db.html', context)
 
+@login_required
+def add_object(request):
+    if not request.user.is_staff:
+        return redirect('system')
+
+    if request.method == 'POST':
+        form = ObjectForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('edit_db')
+    else:
+        form = ObjectForm()
+
+    return render(request, 'core/add_object.html', {'form': form})
 @login_required
 def system_settings(request):
     return render(request, 'core/system_settings.html')

@@ -1,0 +1,43 @@
+<!-- core/templates/core/view_users.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Просмотр пользователей</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/view_users.css' %}">
+</head>
+<body>
+    <div class="form-container">
+        <h2>Список пользователей</h2>
+
+        <form method="get" class="search-form">
+            <input type="text" name="q" placeholder="Поиск по логину или ID..." class="search-input">
+            <button type="submit" class="search-btn">Найти</button>
+        </form>
+
+        <table border="1">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Логин</th>
+                    <th>Пароль</th>
+                    <th>Администратор</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for user in users %}
+                    <tr>
+                        <td>{{ user.id }}</td>
+                        <td>{{ user.username }}</td>
+                        <td>{{ user.password }}</td>
+                        <td>{{ user.is_staff|yesno:"Да,Нет" }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <br>
+        <a href="{% url 'edit_db' %}" class="btn-back">Назад</a>
+    </div>
+</body>
+</html>
