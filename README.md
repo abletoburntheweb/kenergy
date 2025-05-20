@@ -11,6 +11,10 @@ cd ...\kenergy\
 ```
 (venv) C:\...\kenergy\>
 ```
+Установите зависимости
+```
+pip install -r requirements.txt
+```
 Запустите сервер разработки Django  
 ```  
 python manage.py runserver
