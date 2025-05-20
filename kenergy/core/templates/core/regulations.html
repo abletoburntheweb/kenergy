@@ -9,6 +9,14 @@
     <link rel="stylesheet" href="{% static 'css/regulations.css' %}">
 </head>
 <body>
+<div class="header">
+        <div class="welcome-message">
+            Добро пожаловать, {{ request.user.username }}!
+        </div>
+        <div class="logout-button">
+            <a href="{% url 'logout' %}" class="btn-logout">Выйти</a>
+        </div>
+    </div>
     <div class="form-container">
         <h2>Регламенты</h2>
 

@@ -1,5 +1,52 @@
 /* core/static/css/edit_db.css */
 
+.header {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    padding: 15px 5px;
+    background-color: #6e8efb;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1000;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.header-right {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    margin-right: 20px;
+}
+
+.welcome-message {
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+}
+
+.logout-button a {
+    color: white;
+    text-decoration: none;
+    font-size: 16px;
+    font-weight: bold;
+    padding: 5px 15px; /
+    border: none;
+    border-radius: 5px;
+    background-color: #6e8efb;
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+.logout-button a:hover {
+    background-color: white;
+    color: #6e8efb;
+}
+
 body {
     font-family: 'Arial', sans-serif;
     background: linear-gradient(135deg, #6e8efb, #a777e3);
@@ -54,10 +101,12 @@ h2 {
     color: #6e8efb;
     text-decoration: none;
     font-size: 14px;
+    transition: color 0.3s ease;
 }
 
 .btn-back:hover {
     text-decoration: underline;
+    color: #5a7de2;
 }
 
 .mt-3 {

@@ -10,13 +10,19 @@
     <link rel="stylesheet" href="{% static 'css/add_user.css' %}">
 </head>
 <body>
+<div class="header">
+        <div class="welcome-message">
+            Добро пожаловать, {{ request.user.username }}!
+        </div>
+        <div class="logout-button">
+            <a href="{% url 'logout' %}" class="btn-logout">Выйти</a>
+        </div>
+    </div>
     <div class="form-container">
         <h2>Добавить нового пользователя</h2>
 
-        <!-- Кнопка "Назад в панель" -->
         <a href="{% url 'admin_panel' %}" class="btn-back">Назад в панель</a>
 
-        <!-- Отображение общих ошибок формы -->
         {% if form.non_field_errors %}
             <div class="alert">
                 <p>Общие ошибки:</p>
@@ -28,11 +34,9 @@
             </div>
         {% endif %}
 
-        <!-- Форма добавления пользователя -->
         <form method="post">
             {% csrf_token %}
 
-            <!-- Имя пользователя -->
             <div class="form-group">
                 <label for="{{ form.username.id_for_label }}">Имя пользователя</label>
                 {{ form.username }}
@@ -47,7 +51,6 @@
                 {% endif %}
             </div>
 
-            <!-- Пароль -->
             <div class="form-group">
                 <label for="{{ form.password1.id_for_label }}">Пароль</label>
                 {{ form.password1 }}
@@ -65,7 +68,6 @@
                 {% endif %}
             </div>
 
-            <!-- Подтверждение пароля -->
             <div class="form-group">
                 <label for="{{ form.password2.id_for_label }}">Подтверждение пароля</label>
                 {{ form.password2 }}
@@ -80,7 +82,6 @@
                 {% endif %}
             </div>
 
-            <!-- Чекбокс "Администратор" -->
             <div class="checkbox-container">
                 <input type="checkbox" id="id_is_admin" name="is_admin" {% if form.is_admin.value %}checked{% endif %}>
                 <label for="id_is_admin">Является администратором</label>
@@ -95,7 +96,6 @@
                 {% endif %}
             </div>
 
-            <!-- Кнопка отправки формы -->
             <button type="submit" class="btn-submit">Добавить</button>
         </form>
     </div>

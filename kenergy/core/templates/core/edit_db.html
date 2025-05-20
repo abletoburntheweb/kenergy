@@ -9,6 +9,17 @@
     <link rel="stylesheet" href="{% static 'css/edit_db.css' %}">
 </head>
 <body>
+    <div class="header">
+        <div class="header-right">
+            <div class="welcome-message">
+                Добро пожаловать, {{ request.user.username }}!
+            </div>
+            <div class="logout-button">
+                <a href="{% url 'logout' %}" class="btn-logout">Выйти</a>
+            </div>
+        </div>
+    </div>
+
     <div class="form-container">
         <h2>Редактировать БД</h2>
         <div class="button-group">
