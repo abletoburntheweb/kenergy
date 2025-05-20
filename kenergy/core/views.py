@@ -4,7 +4,8 @@ import logging
 from django.contrib.auth.forms import AuthenticationForm
 from django.contrib.auth.models import User
 from django.db.models import Q
-from django.shortcuts import render, redirect
+from django.http import JsonResponse
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth import login
 from django.contrib.auth.decorators import login_required
 from .forms import RegisterForm, ObjectForm
@@ -66,19 +67,40 @@ def add_user(request):
 
 @login_required
 def view_users(request):
-    if not request.user.is_staff:
-        return redirect('system')
+    if not request.user.is_staff:  # Если пользователь не администратор
+        return redirect('system')  # Перенаправляем на страницу "Система"
 
+    # Удаление пользователя
+    if request.method == 'POST' and 'delete_user' in request.POST:
+        user_id = request.POST.get('user_id')
+        user = get_object_or_404(User, id=user_id)
+        user.delete()
+        return redirect('view_users')  # Перенаправляем обратно на страницу после удаления
+
+    # Получаем параметр поиска из GET-запроса
     query = request.GET.get('q')
 
+    # Фильтруем пользователей по логину или ID
     if query:
         users = User.objects.filter(
-            Q(username__icontains=query)
-        ).order_by('id')
+            Q(username__icontains=query) |  # Поиск по логину
+            Q(id__icontains=query)         # Поиск по ID
+        ).order_by('id')  # Сортировка по ID в порядке возрастания
     else:
-        users = User.objects.all().order_by('id')
+        users = User.objects.all().order_by('id')  # Сортировка по ID в порядке возрастания
 
     return render(request, 'core/view_users.html', {'users': users})
+@login_required
+def delete_user(request):
+    if request.method == 'POST':
+        user_id = request.POST.get('user_id')
+        try:
+            user = User.objects.get(id=user_id)
+            user.delete()
+            return JsonResponse({'success': True})
+        except User.DoesNotExist:
+            return JsonResponse({'success': False, 'error': 'Пользователь не найден'})
+    return JsonResponse({'success': False, 'error': 'Неверный метод запроса'})
 
 @login_required
 def edit_db(request):

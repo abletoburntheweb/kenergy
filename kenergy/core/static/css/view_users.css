@@ -76,3 +76,12 @@ table th {
 .btn-back:hover {
     text-decoration: underline;
 }
+.delete-user-btn {
+    color: red;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.delete-user-btn:hover {
+    text-decoration: underline;
+}

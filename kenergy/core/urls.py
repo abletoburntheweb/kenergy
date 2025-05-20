@@ -12,4 +12,5 @@ urlpatterns = [
     path('regulations/', views.regulations, name='regulations'),  # Положения
     path('definition/', views.definition, name='definition'),  # Определение объекта
     path('defects/', views.defects, name='defects'),  # Дефекты
+    path('delete_user/', views.delete_user, name='delete_user'),
 ]
