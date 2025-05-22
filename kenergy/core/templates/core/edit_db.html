@@ -3,26 +3,25 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Добавление объекта</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/edit_db.css' %}">
+    <link rel="stylesheet" href="{% static 'css/edit_db.css' %}?v=1">
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js "></script>
 </head>
 <body>
     <div class="header">
-        <div class="header-right">
-            <div class="welcome-message">
-                Добро пожаловать, {{ request.user.username }}!
-            </div>
-            <div class="logout-button">
-                <a href="{% url 'logout' %}" class="btn-logout">Выйти</a>
-            </div>
+        <div class="welcome-message">
+            Добро пожаловать, {{ request.user.username }}!
+        </div>
+        <div class="logout-button">
+            <a href="{% url 'logout' %}" class="btn-logout">Выйти</a>
         </div>
     </div>
 
     <div class="form-container">
         <h2>Добавление объекта</h2>
-        <form method="post" action="{% url 'save_object' %}">
+
+        <form method="post" action="{% url 'save_object' %}" id="edit-db-form">
             {% csrf_token %}
             <div class="form-group">
                 <label for="group">Группа:</label>
@@ -35,74 +34,48 @@
                 <button type="button" class="add-button">+</button>
             </div>
 
-            <div class="form-group">
-                <label for="subgroup">Подгруппа:</label>
-                <select id="subgroup" name="subgroup">
-                    <option value="">Выберите подгруппу</option>
-                    {% for subgroup in subgroups %}
-                        <option value="{{ subgroup.id_g }}">{{ subgroup.название }}</option>
-                    {% endfor %}
-                </select>
-                <button type="button" class="add-button">+</button>
-            </div>
-
-            <div class="form-group">
-                <label for="object">Объект:</label>
-                <select id="object" name="object">
-                    <option value="">Выберите объект</option>
-                    {% for obj in objects %}
-                        <option value="{{ obj.id_o }}">{{ obj.название }}</option>
-                    {% endfor %}
-                </select>
-                <button type="button" class="add-button">+</button>
-            </div>
-
             <div class="section">
                 <h3>Регламенты</h3>
-                <div class="table-container">
-                    <table id="regulations-table">
-                        <thead>
-                            <tr>
-                                <th>Стандарт</th>
-                                <th>Требование</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><input type="text" name="standard" placeholder="Стандарт"></td>
-                                <td><input type="text" name="requirement" placeholder="Требование"></td>
-                                <td><button type="button" class="remove-button">×</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <button type="button" class="add-row-button">+</button>
-                </div>
+                <table id="regulations-table" border="1">
+                    <thead>
+                        <tr>
+                            <th>Стандарт</th>
+                            <th>Требование</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" name="standard" placeholder="Стандарт" class="full-width-input"></td>
+                            <td><input type="text" name="requirement" placeholder="Требование" class="full-width-input"></td>
+                            <td><button type="button" class="remove-row-btn">×</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="add-row-btn">+</button>
             </div>
 
             <div class="section">
                 <h3>Дефекты</h3>
-                <div class="table-container">
-                    <table id="defects-table">
-                        <thead>
-                            <tr>
-                                <th>Испытания</th>
-                                <th>Рекомендуемые действия</th>
-                                <th>Метрика</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td><input type="text" name="test" placeholder="Испытания"></td>
-                                <td><input type="text" name="recommendation" placeholder="Рекомендуемые действия"></td>
-                                <td><input type="number" name="metric" placeholder="Метрика"></td>
-                                <td><button type="button" class="remove-button">×</button></td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    <button type="button" class="add-row-button">+</button>
-                </div>
+                <table id="defects-table" border="1">
+                    <thead>
+                        <tr>
+                            <th>Испытания</th>
+                            <th>Рекомендуемые действия</th>
+                            <th>Метрика</th>
+                            <th>Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><input type="text" name="test" placeholder="Испытания" class="full-width-input"></td>
+                            <td><input type="text" name="recommendation" placeholder="Рекомендуемые действия" class="full-width-input"></td>
+                            <td><input type="number" name="metric" placeholder="Метрика" class="full-width-input"></td>
+                            <td><button type="button" class="remove-row-btn">×</button></td>
+                        </tr>
+                    </tbody>
+                </table>
+                <button type="button" class="add-row-btn">+</button>
             </div>
 
             <button type="submit" class="save-button">Сохранить</button>

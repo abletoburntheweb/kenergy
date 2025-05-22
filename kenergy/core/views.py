@@ -249,7 +249,6 @@ def system_settings(request):
 @login_required
 def save_object(request):
     if request.method == 'POST':
-        # Получаем данные из POST-запроса
         group_id = request.POST.get('group')
         subgroup_id = request.POST.get('subgroup')
         object_id = request.POST.get('object')

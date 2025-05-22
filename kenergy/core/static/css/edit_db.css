@@ -2,7 +2,7 @@
 
 .header {
     display: flex;
-    justify-content: flex-end;
+    justify-content: space-between;
     align-items: center;
     padding: 15px 5px;
     background-color: #6e8efb;
@@ -17,13 +17,6 @@
     box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
 }
 
-.header-right {
-    display: flex;
-    align-items: center;
-    gap: 15px;
-    margin-right: 20px;
-}
-
 .welcome-message {
     font-size: 16px;
     font-weight: bold;
@@ -35,7 +28,7 @@
     text-decoration: none;
     font-size: 16px;
     font-weight: bold;
-    padding: 5px 10px;
+    padding: 5px 15px;
     border: none;
     border-radius: 5px;
     background-color: #6e8efb;
@@ -107,44 +100,29 @@ h2 {
     margin-top: 20px;
 }
 
-.table-container {
-    position: relative;
-}
-
 table {
     width: 100%;
     border-collapse: collapse;
-    margin-bottom: 10px;
+    margin-top: 20px;
 }
 
-table th,
-table td {
+table th, table td {
     padding: 10px;
     border: 1px solid #ddd;
     text-align: left;
 }
 
-table input {
+table th {
+    background-color: #f4f4f4;
+}
+
+.full-width-input {
     width: 100%;
     padding: 5px;
     box-sizing: border-box;
 }
 
-.remove-button {
-    background-color: #ff4d4d;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-.remove-button:hover {
-    background-color: #c83737;
-}
-
-.add-row-button {
+.add-row-btn {
     background-color: #6e8efb;
     color: white;
     border: none;
@@ -154,8 +132,18 @@ table input {
     transition: background-color 0.3s ease;
 }
 
-.add-row-button:hover {
+.add-row-btn:hover {
     background-color: #5a7de2;
+}
+
+.remove-row-btn {
+    color: red;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.remove-row-btn:hover {
+    text-decoration: underline;
 }
 
 .save-button {
@@ -175,13 +163,11 @@ table input {
 }
 
 .back-link {
-    display: block;
-    margin-top: 10px;
-    text-decoration: none;
     color: #6e8efb;
-    transition: color 0.3s ease;
+    text-decoration: none;
+    font-size: 14px;
 }
 
 .back-link:hover {
-    color: #5a7de2;
+    text-decoration: underline;
 }
