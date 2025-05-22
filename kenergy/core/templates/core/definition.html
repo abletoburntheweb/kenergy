@@ -1,0 +1,98 @@
+<!-- core/templates/core/definition.html -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Определение</title>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/definition.css' %}">
+</head>
+<body>
+<div class="header">
+        <div class="welcome-message">
+            Добро пожаловать, {{ request.user.username }}!
+        </div>
+        <div class="logout-button">
+            <a href="{% url 'logout' %}" class="btn-logout">Выйти</a>
+        </div>
+    </div>
+    <div class="form-container">
+        <h2>Определение</h2>
+
+        <form method="get">
+            <div class="form-group">
+                <label for="inventory-select">Основная группа</label>
+                <select id="inventory-select" name="inventory" onchange="this.form.submit()">
+                    <option value="">Выберите основную группу</option>
+                    {% for inventory in inventories %}
+                        <option value="{{ inventory.id_i }}" {% if inventory.id_i == selected_inventory_id %}selected{% endif %}>
+                            {{ inventory.name }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            {% if groups %}
+                <div class="form-group">
+                    <label for="group-select">Подгруппа</label>
+                    <select id="group-select" name="group" onchange="this.form.submit()">
+                        <option value="">Выберите подгруппу</option>
+                        {% for group in groups %}
+                            <option value="{{ group.id_g }}" {% if group.id_g == selected_group_id %}selected{% endif %}>
+                                {{ group.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            {% endif %}
+
+            <button type="button" onclick="location.href='{% url 'system_settings' %}'" class="btn">Назад</button>
+        </form>
+
+        <div class="tables-container">
+            <div class="left-table">
+                <form method="post">
+                    {% csrf_token %}
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Факт</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for fact in facts %}
+                                <tr>
+                                    <td>{{ fact.fact_name }}</td>
+                                    <td>
+                                        <input type="checkbox" name="fact" value="{{ fact.id_d }}">
+                                    </td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="2">Нет фактов</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <button type="submit" class="btn">Определить</button>
+                </form>
+            </div>
+
+            <div class="right-table">
+                {% if objects %}
+                    <p><strong>Определен объект:</strong></p>
+                    <ul>
+                        {% for obj in objects %}
+                            <li>{{ obj.name }}: {{ obj.description }}</li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <p>Выберите факты для определения объекта.</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</body>
+</html>
