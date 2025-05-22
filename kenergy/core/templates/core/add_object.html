@@ -1,0 +1,70 @@
+<!-- core/templates/core/add_object.html -->
+<div class="add-object-form">
+    <h2>Добавление объекта</h2>
+    <div class="form-group">
+        <label for="group">Группа:</label>
+        <select id="group" name="group">
+            {% for group in groups %}
+                <option value="{{ group.id }}">{{ group.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="button" class="add-button">+</button>
+    </div>
+    <div class="form-group">
+        <label for="subgroup">Подгруппа:</label>
+        <select id="subgroup" name="subgroup">
+            {% for subgroup in subgroups %}
+                <option value="{{ subgroup.id }}">{{ subgroup.name }}</option>
+            {% endfor %}
+        </select>
+        <button type="button" class="add-button">+</button>
+    </div>
+
+    <div class="section">
+        <h3>Регламенты</h3>
+        <div class="table-container">
+            <table id="regulations-table">
+                <thead>
+                    <tr>
+                        <th>Стандарт</th>
+                        <th>Требование</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" placeholder="Стандарт"></td>
+                        <td><input type="text" placeholder="Требование"></td>
+                        <td><button type="button" class="remove-button">×</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="button" class="add-row-button">+</button>
+        </div>
+    </div>
+
+    <div class="section">
+        <h3>Дефекты</h3>
+        <div class="table-container">
+            <table id="defects-table">
+                <thead>
+                    <tr>
+                        <th>Испытания</th>
+                        <th>Рекомендуемые действия</th>
+                        <th></th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><input type="text" placeholder="Испытания"></td>
+                        <td><input type="text" placeholder="Рекомендуемые действия"></td>
+                        <td><button type="button" class="remove-button">×</button></td>
+                    </tr>
+                </tbody>
+            </table>
+            <button type="button" class="add-row-button">+</button>
+        </div>
+    </div>
+
+    <button type="submit" class="save-button">Сохранить</button>
+</div>

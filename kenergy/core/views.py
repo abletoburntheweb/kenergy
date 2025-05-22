@@ -225,10 +225,61 @@ def standards_delete(request, pk):
 def edit_db(request):
     if not request.user.is_staff:
         return redirect('system_settings')
-    return render(request, 'core/edit_db.html')
+
+    # Получаем все инвентари
+    inventories = Inventory.objects.all()
+
+    # Получаем выбранный инвентарь из GET-параметров
+    selected_inventory_id = request.GET.get('inventory')
+    if selected_inventory_id:
+        groups = Groups.objects.filter(id_i=selected_inventory_id)
+    else:
+        groups = []
+
+    # Передаем данные в шаблон
+    return render(request, 'core/edit_db.html', {
+        'inventories': inventories,
+        'groups': groups,
+        'selected_inventory_id': int(selected_inventory_id) if selected_inventory_id else None,
+    })
 @login_required
 def system_settings(request):
     return render(request, 'core/system_settings.html')
+
+@login_required
+def save_object(request):
+    if request.method == 'POST':
+        # Получаем данные из POST-запроса
+        group_id = request.POST.get('group')
+        subgroup_id = request.POST.get('subgroup')
+        object_id = request.POST.get('object')
+
+        standards = request.POST.getlist('standard')
+        requirements = request.POST.getlist('requirement')
+
+        tests = request.POST.getlist('test')
+        recommendations = request.POST.getlist('recommendation')
+        metrics = request.POST.getlist('metric')
+
+        # Создаем объект
+        group = Groups.objects.get(id_g=group_id)
+        obj = Object.objects.create(id_g=group, название="Новый объект")
+
+        # Создаем стандарты
+        for standard, requirement in zip(standards, requirements):
+            Standards.objects.create(id_o=obj, стандарт=standard, требование=requirement)
+
+        # Создаем тесты
+        for test, recommendation, metric in zip(tests, recommendations, metrics):
+            Tests.objects.create(
+                id_o=obj,
+                испытание=test,
+                рекомендация=recommendation,
+                метрика=float(metric)
+            )
+
+        return redirect('edit_db')
+    return redirect('edit_db')
 
 @login_required
 def regulations(request):

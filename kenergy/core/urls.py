@@ -23,6 +23,7 @@ urlpatterns = [
     path('', views.login_view, name='login'),
     path('admin-panel/', views.admin_panel, name='admin_panel'),
     path('edit-db/', views.edit_db, name='edit_db'),
+    path('save-object/', views.save_object, name='save_object'),
     path('system-settings/', views.system_settings, name='system_settings'),
     path('regulations/', views.regulations, name='regulations'),  # Регламенты
     path('definition/', views.definition, name='definition'),  # Определение
