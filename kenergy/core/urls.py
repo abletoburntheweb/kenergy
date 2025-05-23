@@ -20,6 +20,9 @@ from django.urls import path
 from . import views
 
 urlpatterns = [
+
+    path('api/groups/', views.get_groups, name='get_groups'),
+    path('api/objects/', views.get_objects, name='get_objects'),
     path('', views.login_view, name='login'),
     path('admin-panel/', views.admin_panel, name='admin_panel'),
     path('edit-db/', views.edit_db, name='edit_db'),
@@ -43,10 +46,10 @@ urlpatterns = [
     path('groups/delete/<int:pk>/', views.groups_delete, name='groups_delete'),
 
     # Объекты
-    path('objects/', views.object_list, name='object_list'),
-    path('objects/create/', views.object_create, name='object_create'),
-    path('objects/edit/<int:pk>/', views.object_edit, name='object_edit'),
-    path('objects/delete/<int:pk>/', views.object_delete, name='object_delete'),
+    path('object/', views.object_list, name='object_list'),
+    path('object/create/', views.object_create, name='object_create'),
+    path('object/edit/<int:pk>/', views.object_edit, name='object_edit'),
+    path('object/delete/<int:pk>/', views.object_delete, name='object_delete'),
 
     # Тесты
     path('tests/', views.tests_list, name='tests_list'),

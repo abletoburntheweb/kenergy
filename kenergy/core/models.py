@@ -10,8 +10,10 @@ class Inventory(models.Model):
 
 class Groups(models.Model):
     id_g = models.AutoField(primary_key=True)
-    id_i = models.ForeignKey(Inventory, on_delete=models.CASCADE, related_name='groups')
+    id_i = models.ForeignKey(Inventory, on_delete=models.CASCADE, db_column="id_i_id")
     название = models.CharField(max_length=255, null=False)
+
+    objects = models.Manager()  # Убедитесь, что эта строка присутствует
 
     class Meta:
         unique_together = ('id_i', 'название')
@@ -22,7 +24,7 @@ class Groups(models.Model):
 class Object(models.Model):
     id_o = models.AutoField(primary_key=True)
     название = models.CharField(max_length=255)
-    id_g = models.ForeignKey(Groups, on_delete=models.CASCADE, related_name='objects')
+    id_g = models.ForeignKey(Groups, on_delete=models.CASCADE, db_column='id_g_id')
 
     class Meta:
         unique_together = ('id_g', 'название')
@@ -32,7 +34,7 @@ class Object(models.Model):
 
 class Tests(models.Model):
     id_def = models.AutoField(primary_key=True)
-    id_o = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='tests')
+    id_o = models.ForeignKey(Object, on_delete=models.CASCADE, db_column='id_o_id')
     испытание = models.TextField(null=False)
     метрика = models.FloatField(null=False)
     рекомендация = models.TextField(null=False)
@@ -42,7 +44,7 @@ class Tests(models.Model):
 
 class Standards(models.Model):
     id_s = models.AutoField(primary_key=True)
-    id_o = models.ForeignKey(Object, on_delete=models.CASCADE, related_name='standards')
+    id_o = models.ForeignKey(Object, on_delete=models.CASCADE, db_column='id_o_id')
     стандарт = models.TextField(null=False)
     требование = models.TextField(null=False)
 

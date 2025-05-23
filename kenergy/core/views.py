@@ -1,11 +1,14 @@
+import sys
+
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
+from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Inventory, Groups, Object, Tests, Standards
+from .models import Inventory, Groups as GroupsModel, Object, Tests, Standards
 from .user import (
     UserInventoryForm,
-    UserGroupsForm,
+    UserGroupForm,
     UserObjectForm,
     UserTestsForm,
     UserStandardsForm,
@@ -32,13 +35,11 @@ def admin_panel(request):
     if not request.user.is_superuser:
         return redirect('system_settings')
     return render(request, 'core/admin_panel.html')
-# Список инвентаря
 @login_required
 def inventory_list(request):
     inventories = Inventory.objects.all()
     return render(request, 'core/inventory_list.html', {'inventories': inventories})
 
-# Создание инвентаря
 @login_required
 def inventory_create(request):
     if request.method == 'POST':
@@ -50,7 +51,6 @@ def inventory_create(request):
         form = UserInventoryForm()
     return render(request, 'core/inventory_form.html', {'form': form})
 
-# Редактирование инвентаря
 @login_required
 def inventory_edit(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
@@ -74,35 +74,35 @@ def inventory_delete(request, pk):
 # Список групп
 @login_required
 def groups_list(request):
-    groups = Groups.objects.all()
+    groups = GroupsModel.objects.all()
     return render(request, 'core/groups_list.html', {'groups': groups})
 
 @login_required
 def groups_create(request):
     if request.method == 'POST':
-        form = UserGroupsForm(request.POST)
+        form = UserGroupForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('groups_list')
     else:
-        form = UserGroupsForm()
+        form = UserGroupForm()
     return render(request, 'core/groups_form.html', {'form': form})
 
 @login_required
 def groups_edit(request, pk):
-    group = get_object_or_404(Groups, pk=pk)
+    group = get_object_or_404(GroupsModel, pk=pk)
     if request.method == 'POST':
-        form = UserGroupsForm(request.POST, instance=group)
+        form = UserGroupForm(request.POST, instance=group)
         if form.is_valid():
             form.save()
             return redirect('groups_list')
     else:
-        form = UserGroupsForm(instance=group)
+        form = UserGroupForm(instance=group)
     return render(request, 'core/groups_form.html', {'form': form})
 
 @login_required
 def groups_delete(request, pk):
-    group = get_object_or_404(Groups, pk=pk)
+    group = get_object_or_404(GroupsModel, pk=pk)
     if request.method == 'POST':
         group.delete()
         return redirect('groups_list')
@@ -221,41 +221,34 @@ def standards_delete(request, pk):
         return redirect('standards_list')
     return render(request, 'core/standards_confirm_delete.html', {'standard': standard})
 
+
 @login_required
 def edit_db(request):
-    if not request.user.is_staff:
-        return redirect('system_settings')
-
-    # Получаем все инвентари
     inventories = Inventory.objects.all()
-
-    # Получаем выбранный инвентарь из GET-параметров
     selected_inventory_id = request.GET.get('inventory')
-    print("Selected inventory ID:", selected_inventory_id)  # Отладочный вывод
-
-    # Преобразуем selected_inventory_id в целое число
-    try:
-        selected_inventory_id = int(selected_inventory_id) if selected_inventory_id else None
-    except ValueError:
-        print("Ошибка: Некорректное значение inventory")
-        selected_inventory_id = None
-
-    # Фильтруем группы по выбранному инвентарю
-    groups = []
     if selected_inventory_id:
-        try:
-            groups = Groups.objects.filter(id_i_id=selected_inventory_id)
-            print("Filtered groups:", groups)  # Отладочный вывод
-        except Exception as e:
-            print("Ошибка при фильтрации групп:", e)  # Отладочный вывод
-            raise
-
-    # Передаем данные в шаблон
-    return render(request, 'core/edit_db.html', {
+        groups = GroupsModel.objects.filter(id_i_id=selected_inventory_id)
+    else:
+        groups = []
+    context = {
         'inventories': inventories,
         'groups': groups,
         'selected_inventory_id': selected_inventory_id,
-    })
+    }
+    return render(request, 'core/edit_db.html', context)
+
+def get_inventories(request):
+    inventories = Inventory.objects.all().values('id_i', 'название')
+    return JsonResponse(list(inventories), safe=False)
+
+def get_groups(request):
+    inventory_id = request.GET.get('inventory')
+    groups = GroupsModel.objects.filter(id_i=inventory_id).values('id_g', 'название')
+
+def get_objects(request):
+    group_id = request.GET.get('group')
+    objects = Object.objects.filter(id_g=group_id).values('id_o', 'название')
+    return JsonResponse(list(objects), safe=False)
 @login_required
 def system_settings(request):
     return render(request, 'core/system_settings.html')
@@ -263,26 +256,31 @@ def system_settings(request):
 @login_required
 def save_object(request):
     if request.method == 'POST':
+        inventory_id = request.POST.get('inventory')
         group_id = request.POST.get('group')
-        subgroup_id = request.POST.get('subgroup')
         object_id = request.POST.get('object')
+        standards = request.POST.getlist('standard[]')
+        requirements = request.POST.getlist('requirement[]')
+        tests = request.POST.getlist('test[]')
+        recommendations = request.POST.getlist('recommendation[]')
+        metrics = request.POST.getlist('metric[]')
 
-        standards = request.POST.getlist('standard')
-        requirements = request.POST.getlist('requirement')
+        if not inventory_id or not group_id:
+            return redirect('edit_db')
 
-        tests = request.POST.getlist('test')
-        recommendations = request.POST.getlist('recommendation')
-        metrics = request.POST.getlist('metric')
+        inventory = Inventory.objects.get(id_i=inventory_id)
+        group = GroupsModel.objects.get(id_g=group_id)
 
-        # Создаем объект
-        group = Groups.objects.get(id_g=group_id)
-        obj = Object.objects.create(id_g=group, название="Новый объект")
+        if object_id:
+            obj = Object.objects.get(id_o=object_id)
+            obj.id_g = group
+            obj.save()
+        else:
+            obj = Object.objects.create(id_g=group, название="Новый объект")
 
-        # Создаем стандарты
         for standard, requirement in zip(standards, requirements):
             Standards.objects.create(id_o=obj, стандарт=standard, требование=requirement)
 
-        # Создаем тесты
         for test, recommendation, metric in zip(tests, recommendations, metrics):
             Tests.objects.create(
                 id_o=obj,
@@ -304,7 +302,7 @@ def regulations(request):
     standards = []
 
     if selected_inventory_id:
-        groups = Groups.objects.filter(id_i=selected_inventory_id)
+        groups = GroupsModel.objects.filter(id_i=selected_inventory_id)
     else:
         groups = []
 
@@ -328,7 +326,7 @@ def definition(request):
     inventories = Inventory.objects.all()
 
     selected_inventory_id = request.GET.get('inventory')
-    groups = Groups.objects.filter(id_i=selected_inventory_id) if selected_inventory_id else []
+    groups = GroupsModel.objects.filter(id_i=selected_inventory_id) if selected_inventory_id else []
 
     selected_group_id = request.GET.get('group')
     tests = Tests.objects.filter(id_o__id_g=selected_group_id).select_related('id_o') if selected_group_id else []
@@ -357,7 +355,7 @@ def defects(request):
     inventories = Inventory.objects.all()
 
     selected_inventory_id = request.GET.get('inventory')
-    groups = Groups.objects.filter(id_i=selected_inventory_id) if selected_inventory_id else []
+    groups = GroupsModel.objects.filter(id_i=selected_inventory_id) if selected_inventory_id else []
 
     selected_group_id = request.GET.get('group')
     objects = Object.objects.filter(id_g=selected_group_id) if selected_group_id else []

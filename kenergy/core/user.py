@@ -1,5 +1,6 @@
 from django import forms
 from .models import Inventory, Groups, Object, Tests, Standards
+from .models import Groups as GroupModel
 
 # Формы для пользователей
 class UserInventoryForm(forms.ModelForm):
@@ -7,10 +8,10 @@ class UserInventoryForm(forms.ModelForm):
         model = Inventory
         fields = ['название']
 
-class UserGroupsForm(forms.ModelForm):
+class UserGroupForm(forms.ModelForm):
     class Meta:
-        model = Groups
-        fields = ['id_i', 'название']
+        model = GroupModel
+        fields = '__all__'
 
 class UserObjectForm(forms.ModelForm):
     class Meta:
