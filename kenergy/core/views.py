@@ -231,16 +231,30 @@ def edit_db(request):
 
     # Получаем выбранный инвентарь из GET-параметров
     selected_inventory_id = request.GET.get('inventory')
+    print("Selected inventory ID:", selected_inventory_id)  # Отладочный вывод
+
+    # Преобразуем selected_inventory_id в целое число
+    try:
+        selected_inventory_id = int(selected_inventory_id) if selected_inventory_id else None
+    except ValueError:
+        print("Ошибка: Некорректное значение inventory")
+        selected_inventory_id = None
+
+    # Фильтруем группы по выбранному инвентарю
+    groups = []
     if selected_inventory_id:
-        groups = Groups.objects.filter(id_i=selected_inventory_id)
-    else:
-        groups = []
+        try:
+            groups = Groups.objects.filter(id_i_id=selected_inventory_id)
+            print("Filtered groups:", groups)  # Отладочный вывод
+        except Exception as e:
+            print("Ошибка при фильтрации групп:", e)  # Отладочный вывод
+            raise
 
     # Передаем данные в шаблон
     return render(request, 'core/edit_db.html', {
         'inventories': inventories,
         'groups': groups,
-        'selected_inventory_id': int(selected_inventory_id) if selected_inventory_id else None,
+        'selected_inventory_id': selected_inventory_id,
     })
 @login_required
 def system_settings(request):

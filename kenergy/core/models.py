@@ -21,8 +21,8 @@ class Groups(models.Model):
 
 class Object(models.Model):
     id_o = models.AutoField(primary_key=True)
+    название = models.CharField(max_length=255)
     id_g = models.ForeignKey(Groups, on_delete=models.CASCADE, related_name='objects')
-    название = models.CharField(max_length=255, null=False)
 
     class Meta:
         unique_together = ('id_g', 'название')

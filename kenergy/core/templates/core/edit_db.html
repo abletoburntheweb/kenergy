@@ -20,20 +20,53 @@
 
     <div class="form-container">
         <h2>Добавление объекта</h2>
+    <form method="get">
+        <!-- Инвентарь -->
+        <div class="form-group">
+            <label for="inventory-select">Инвентарь:</label>
+            <select id="inventory-select" name="inventory" onchange="this.form.submit()">
+                <option value="">Выберите инвентарь</option>
+                {% for inventory in inventories %}
+                    <option value="{{ inventory.id_i }}" {% if inventory.id_i == selected_inventory_id %}selected{% endif %}>
+                        {{ inventory.название }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <!-- Группы -->
+        {% if groups %}
+            <div class="form-group">
+                <label for="group-select">Группа:</label>
+                <select id="group-select" name="group" onchange="this.form.submit()">
+                    <option value="">Выберите группу</option>
+                    {% for group in groups %}
+                        <option value="{{ group.id_g }}" {% if group.id_g == selected_group_id %}selected{% endif %}>
+                            {{ group.название }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+
+        <!-- Объекты -->
+        {% if objects %}
+            <div class="form-group">
+                <label for="object-select">Объект:</label>
+                <select id="object-select" name="object">
+                    <option value="">Выберите объект</option>
+                    {% for obj in objects %}
+                        <option value="{{ obj.id_o }}">
+                            {{ obj.название }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+        {% endif %}
+    </form>
 
         <form method="post" action="{% url 'save_object' %}" id="edit-db-form">
             {% csrf_token %}
-            <div class="form-group">
-                <label for="group">Группа:</label>
-                <select id="group" name="group">
-                    <option value="">Выберите группу</option>
-                    {% for group in groups %}
-                        <option value="{{ group.id_g }}">{{ group.название }}</option>
-                    {% endfor %}
-                </select>
-                <button type="button" class="add-button">+</button>
-            </div>
-
             <div class="section">
                 <h3>Регламенты</h3>
                 <table id="regulations-table" border="1">
