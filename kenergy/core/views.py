@@ -1,5 +1,5 @@
 import sys
-
+import logging
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
@@ -14,6 +14,7 @@ from .user import (
     UserStandardsForm,
 )
 
+logger = logging.getLogger(__name__)
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -41,15 +42,23 @@ def inventory_list(request):
     return render(request, 'core/inventory_list.html', {'inventories': inventories})
 
 @login_required
+@login_required
 def inventory_create(request):
     if request.method == 'POST':
         form = UserInventoryForm(request.POST)
         if form.is_valid():
             form.save()
-            return redirect('inventory_list')
-    else:
-        form = UserInventoryForm()
-    return render(request, 'core/inventory_form.html', {'form': form})
+            return JsonResponse({
+                'success': True,
+                'id': form.instance.id_i,
+                'name': form.instance.название
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'errors': form.errors
+            }, status=400)
+    return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)
 
 @login_required
 def inventory_edit(request, pk):
@@ -71,11 +80,10 @@ def inventory_delete(request, pk):
         return redirect('inventory_list')
     return render(request, 'core/inventory_confirm_delete.html', {'inventory': inventory})
 
-# Список групп
 @login_required
 def groups_list(request):
-    groups = GroupsModel.objects.all()
-    return render(request, 'core/groups_list.html', {'groups': groups})
+    groups = GroupsModel.objects.all().values('id_g', 'название')
+    return JsonResponse(list(groups), safe=False)
 
 @login_required
 def groups_create(request):
@@ -118,11 +126,19 @@ def object_create(request):
     if request.method == 'POST':
         form = UserObjectForm(request.POST)
         if form.is_valid():
-            form.save()
-            return redirect('object_list')
-    else:
-        form = UserObjectForm()
-    return render(request, 'core/object_form.html', {'form': form})
+            obj = form.save()
+            return JsonResponse({
+                'success': True,
+                'id': obj.id_o,
+                'name': obj.название
+            })
+        else:
+            logger.error(f"Validation errors in UserObjectForm: {form.errors}")
+            return JsonResponse({
+                'success': False,
+                'errors': dict(form.errors)
+            }, status=400)
+    return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)
 
 @login_required
 def object_edit(request, pk):
@@ -172,7 +188,6 @@ def tests_edit(request, pk):
         form = UserTestsForm(instance=test)
     return render(request, 'core/tests_form.html', {'form': form})
 
-# Удаление теста
 @login_required
 def tests_delete(request, pk):
     test = get_object_or_404(Tests, pk=pk)
@@ -181,13 +196,11 @@ def tests_delete(request, pk):
         return redirect('tests_list')
     return render(request, 'core/tests_confirm_delete.html', {'test': test})
 
-# Список стандартов
 @login_required
 def standards_list(request):
     standards = Standards.objects.all()
     return render(request, 'core/standards_list.html', {'standards': standards})
 
-# Создание стандарта
 @login_required
 def standards_create(request):
     if request.method == 'POST':
@@ -199,7 +212,6 @@ def standards_create(request):
         form = UserStandardsForm()
     return render(request, 'core/standards_form.html', {'form': form})
 
-# Редактирование стандарта
 @login_required
 def standards_edit(request, pk):
     standard = get_object_or_404(Standards, pk=pk)
@@ -212,7 +224,6 @@ def standards_edit(request, pk):
         form = UserStandardsForm(instance=standard)
     return render(request, 'core/standards_form.html', {'form': form})
 
-# Удаление стандарта
 @login_required
 def standards_delete(request, pk):
     standard = get_object_or_404(Standards, pk=pk)
@@ -243,8 +254,12 @@ def get_inventories(request):
 
 def get_groups(request):
     inventory_id = request.GET.get('inventory')
+    logger.debug(f"Inventory ID: {inventory_id}")
+    if not inventory_id:
+        return JsonResponse([], safe=False)
     groups = GroupsModel.objects.filter(id_i=inventory_id).values('id_g', 'название')
-
+    logger.debug(f"Groups: {list(groups)}")
+    return JsonResponse(list(groups), safe=False)
 def get_objects(request):
     group_id = request.GET.get('group')
     objects = Object.objects.filter(id_g=group_id).values('id_o', 'название')

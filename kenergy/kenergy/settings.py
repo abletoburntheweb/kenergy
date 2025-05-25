@@ -25,9 +25,20 @@ SECRET_KEY = 'x!q%^8)7h&^cd@lxx5+_q&f9j!75hbo)&_bfna)!52)6xdg-o9'
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
 
-
+LOGGING = {
+    'version': 1,
+    'disable_existing_loggers': False,
+    'handlers': {
+        'console': {
+            'class': 'logging.StreamHandler',
+        },
+    },
+    'root': {
+        'handlers': ['console'],
+        'level': 'DEBUG',  # Установите уровень DEBUG для отладки
+    },
+}
 # Application definition
 
 INSTALLED_APPS = [

@@ -13,7 +13,7 @@ class Groups(models.Model):
     id_i = models.ForeignKey(Inventory, on_delete=models.CASCADE, db_column="id_i_id")
     название = models.CharField(max_length=255, null=False)
 
-    objects = models.Manager()  # Убедитесь, что эта строка присутствует
+    objects = models.Manager()
 
     class Meta:
         unique_together = ('id_i', 'название')

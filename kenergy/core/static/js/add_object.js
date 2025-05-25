@@ -1,29 +1,44 @@
 document.addEventListener('DOMContentLoaded', () => {
-    const inventorySelect = document.getElementById('inventory-select');
-    const groupSelect = document.getElementById('group-select');
-    const objectSelect = document.getElementById('object-select');
+    const mainInventorySelect = document.getElementById('main-inventory-select');
+    const mainGroupSelect = document.getElementById('main-group-select');
+    const mainObjectSelect = document.getElementById('main-object-select');
+    const modalInventorySelect = document.getElementById('modal-inventory-select');
+    const modalGroupSelect = document.getElementById('modal-group-select');
 
-    function updateInventoryList() {
-        fetch('/api/inventories/')
-            .then(response => {
-                if (!response.ok) throw new Error('Ошибка при получении инвентаря');
-                return response.json();
-            })
-            .then(data => populateDropdown(inventorySelect, data))
-            .catch(error => {
-                console.error(error.message);
-                alert('Не удалось загрузить список инвентаря.');
-            });
+    if (!mainInventorySelect) console.error('Элемент с id="main-inventory-select" не найден.');
+    if (!mainGroupSelect) console.error('Элемент с id="main-group-select" не найден.');
+    if (!mainObjectSelect) console.error('Элемент с id="main-object-select" не найден.');
+    if (!modalInventorySelect) console.error('Элемент с id="modal-inventory-select" не найден.');
+    if (!modalGroupSelect) console.error('Элемент с id="modal-group-select" не найден.');
+
+    mainGroupSelect.innerHTML = '<option value="">Выберите группу</option>';
+    mainObjectSelect.innerHTML = '<option value="">Выберите объект</option>';
+    modalGroupSelect.innerHTML = '<option value="">Выберите группу</option>';
+
+    function populateDropdown(selectElement, data) {
+    selectElement.innerHTML = '<option value="">Выберите</option>';
+    data.forEach(item => {
+        const option = document.createElement('option');
+        option.value = item.id_g;
+        option.textContent = item.название;
+        selectElement.appendChild(option);
+    });
+}
+
+    function clearDropdown(selectElement) {
+        selectElement.innerHTML = '<option value="">Выберите</option>';
+        selectElement.disabled = true;
     }
 
-    function updateGroups(inventoryId) {
+    function updateGroups(inventoryId, groupSelect) {
         if (inventoryId) {
             fetch(`/api/groups/?inventory=${inventoryId}`)
                 .then(response => {
-                    if (!response.ok) throw new Error('Ошибка при получении групп');
+                    if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
                     return response.json();
                 })
                 .then(data => {
+                    console.log('Полученные группы:', data);
                     populateDropdown(groupSelect, data);
                     groupSelect.disabled = false;
                 })
@@ -33,18 +48,18 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
         } else {
             clearDropdown(groupSelect);
-            groupSelect.disabled = true;
         }
     }
 
-    function updateObjects(groupId) {
+    function updateObjects(groupId, objectSelect) {
         if (groupId) {
             fetch(`/api/objects/?group=${groupId}`)
                 .then(response => {
-                    if (!response.ok) throw new Error('Ошибка при получении объектов');
+                    if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
                     return response.json();
                 })
                 .then(data => {
+                    console.log('Полученные объекты:', data);
                     populateDropdown(objectSelect, data);
                     objectSelect.disabled = false;
                 })
@@ -54,92 +69,139 @@ document.addEventListener('DOMContentLoaded', () => {
                 });
         } else {
             clearDropdown(objectSelect);
-            objectSelect.disabled = true;
         }
     }
 
-    function populateDropdown(selectElement, data) {
-        selectElement.innerHTML = '<option value="">Выберите</option>';
-        data.forEach(item => {
-            const option = document.createElement('option');
-            option.value = item.id;
-            option.textContent = item.название;
-            selectElement.appendChild(option);
-        });
-    }
-
-    function clearDropdown(selectElement) {
-        selectElement.innerHTML = '<option value="">Выберите</option>';
-        selectElement.disabled = true;
-    }
-
-    inventorySelect.addEventListener('change', () => {
-        const inventoryId = inventorySelect.value;
-        clearDropdown(groupSelect);
-        clearDropdown(objectSelect);
-        updateGroups(inventoryId);
-    });
-
-    groupSelect.addEventListener('change', () => {
-        const groupId = groupSelect.value;
-        clearDropdown(objectSelect);
-        updateObjects(groupId);
-    });
-
-    function handleModalFormSubmit(modalSelector, callback) {
-        const form = document.querySelector(`${modalSelector} form`);
-        form.addEventListener('submit', (event) => {
-            event.preventDefault();
-
-            if (!form.checkValidity()) {
-                alert('Пожалуйста, заполните все обязательные поля.');
-                return;
+    if (mainInventorySelect && mainGroupSelect) {
+        mainInventorySelect.addEventListener('change', () => {
+            const inventoryId = mainInventorySelect.value;
+            clearDropdown(mainGroupSelect);
+            clearDropdown(mainObjectSelect);
+            if (inventoryId) {
+                updateGroups(inventoryId, mainGroupSelect);
             }
-
-            const formData = new FormData(form);
-
-            fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value,
-                },
-            })
-            .then(response => {
-                if (!response.ok) throw new Error('Ошибка при отправке данных');
-                return response.json();
-            })
-            .then(() => {
-                closeModal(modalSelector.replace('#', ''));
-                callback();
-            })
-            .catch(error => {
-                console.error(error.message);
-                alert('Произошла ошибка при сохранении данных.');
-            });
         });
     }
 
-    handleModalFormSubmit('#add-inventory-modal', updateInventoryList);
+    if (mainGroupSelect && mainObjectSelect) {
+        mainGroupSelect.addEventListener('change', () => {
+            const groupId = mainGroupSelect.value;
+            clearDropdown(mainObjectSelect);
+            if (groupId) {
+                updateObjects(groupId, mainObjectSelect);
+            }
+        });
+    }
 
-    handleModalFormSubmit('#add-group-modal', () => {
-        const inventoryId = inventorySelect.value;
-        updateGroups(inventoryId);
+    if (modalInventorySelect && modalGroupSelect) {
+        modalInventorySelect.addEventListener('change', () => {
+            const inventoryId = modalInventorySelect.value;
+            clearDropdown(modalGroupSelect);
+            if (inventoryId) {
+                updateGroups(inventoryId, modalGroupSelect);
+            }
+        });
+    }
+
+    function handleModalFormSubmit(modalSelector, selectId, callback) {
+    const modal = document.querySelector(modalSelector);
+    const form = modal.querySelector('form');
+    if (!modal || !form) {
+        console.error(`Модальное окно или форма с селектором "${modalSelector}" не найдены.`);
+        return;
+    }
+    form.addEventListener('submit', (event) => {
+        event.preventDefault();
+
+        const inventory = document.getElementById('modal-inventory-select').value;
+        const group = document.getElementById('modal-group-select').value;
+        const name = document.getElementById('modal-object-name').value;
+
+        if (!inventory || !group || !name) {
+            alert('Пожалуйста, заполните все обязательные поля.');
+            return;
+        }
+
+        const formData = new FormData(form);
+        console.log('Отправляемые данные:', Object.fromEntries(formData.entries()));
+
+        const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]');
+        if (!csrfToken) {
+            console.error('CSRF-токен не найден.');
+            return;
+        }
+
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrfToken.value,
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errors => {
+                    throw new Error(JSON.stringify(errors));
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                closeModal(modalSelector.replace('#', ''));
+
+                const objectSelect = document.getElementById('main-object-select');
+                clearDropdown(objectSelect);
+
+                const selectElement = document.getElementById(selectId);
+                if (selectElement) {
+                    const newOption = document.createElement('option');
+                    newOption.value = data.id;
+                    newOption.textContent = data.name;
+                    selectElement.appendChild(newOption);
+                    selectElement.value = data.id;
+                }
+
+                if (typeof callback === 'function') {
+                    callback();
+                }
+            } else {
+                alert('Произошла ошибка при добавлении:\n' + JSON.stringify(data.errors));
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка при добавлении:', error.message);
+            alert('Произошла неожиданная ошибка при сохранении данных.');
+        });
+    });
+}
+
+    handleModalFormSubmit('#add-inventory-modal', 'main-inventory-select', () => {
+        updateGroups(mainInventorySelect.value, mainGroupSelect);
     });
 
-    handleModalFormSubmit('#add-object-modal', () => {
-        const groupId = groupSelect.value;
-        updateObjects(groupId);
+    handleModalFormSubmit('#add-group-modal', 'main-group-select', () => {
+        updateObjects(mainGroupSelect.value, mainObjectSelect);
     });
+
+    handleModalFormSubmit('#add-object-modal', 'main-object-select');
 
     function openModal(modalId) {
         const modal = document.getElementById(modalId);
-        modal.style.display = 'block';
+        if (modal) {
+            modal.style.display = 'block';
+        } else {
+            console.error(`Модальное окно с id="${modalId}" не найдено.`);
+        }
     }
 
     function closeModal(modalId) {
         const modal = document.getElementById(modalId);
-        modal.style.display = 'none';
+        if (modal) {
+            modal.style.display = 'none';
+        } else {
+            console.error(`Модальное окно с id="${modalId}" не найдено.`);
+        }
     }
 
     window.onclick = function(event) {
