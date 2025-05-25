@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Добавление объекта</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/edit_db.css' %}?v=2">
+    <link rel="stylesheet" href="{% static 'css/edit_db.css' %}?v=3">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js "></script>
     <script src="{% static 'js/add_object.js' %}"></script>
 </head>
@@ -19,7 +19,6 @@
     </div>
     <div class="form-container">
         <h2>Добавление объекта</h2>
-        <!-- Выбор инвентаря -->
         <div class="form-group">
             <label for="main-inventory-select">Инвентарь:</label>
             <select id="main-inventory-select" name="inventory">
@@ -32,7 +31,6 @@
             </select>
             <button type="button" class="add-button" onclick="openModal('add-inventory-modal')">+ Добавить инвентарь</button>
         </div>
-        <!-- Выбор группы -->
         <div class="form-group">
             <label for="main-group-select">Группа:</label>
             <select id="main-group-select" name="group" disabled>
@@ -48,7 +46,6 @@
             </select>
             <button type="button" class="add-button" onclick="openModal('add-object-modal')">+ Добавить объект</button>
         </div>
-        <!-- Регламенты -->
         <div class="section">
             <h3>Регламенты</h3>
             <table id="regulations-table" border="1">
@@ -69,7 +66,6 @@
             </table>
             <button type="button" class="add-row-btn" data-table-id="regulations-table">+</button>
         </div>
-        <!-- Дефекты -->
         <div class="section">
             <h3>Дефекты</h3>
             <table id="defects-table" border="1">
@@ -92,11 +88,9 @@
             </table>
             <button type="button" class="add-row-btn" data-table-id="defects-table">+</button>
         </div>
-        <!-- Кнопки -->
         <button type="submit" class="save-button">Сохранить</button>
         <a href="{% url 'system_settings' %}" class="back-link">Назад</a>
     </div>
-    <!-- Модальное окно "Добавить инвентарь" -->
     <div id="add-inventory-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -113,7 +107,6 @@
             </div>
         </div>
     </div>
-    <!-- Модальное окно "Добавить группу" -->
     <div id="add-group-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -137,7 +130,6 @@
             </div>
         </div>
     </div>
-    <!-- Модальное окно "Добавить объект" -->
     <div id="add-object-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">

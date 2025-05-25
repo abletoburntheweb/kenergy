@@ -62,4 +62,7 @@ urlpatterns = [
     path('standards/create/', views.standards_create, name='standards_create'),
     path('standards/edit/<int:pk>/', views.standards_edit, name='standards_edit'),
     path('standards/delete/<int:pk>/', views.standards_delete, name='standards_delete'),
+
+    path('api/regulations/', views.get_regulations, name='get_regulations'),
+    path('api/defects/', views.get_defects, name='get_defects'),
 ]

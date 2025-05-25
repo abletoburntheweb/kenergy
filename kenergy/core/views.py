@@ -270,6 +270,7 @@ def system_settings(request):
 
 @login_required
 def save_object(request):
+    logger.debug("Запрос POST в save_object получен.")
     if request.method == 'POST':
         inventory_id = request.POST.get('inventory')
         group_id = request.POST.get('group')
@@ -281,10 +282,15 @@ def save_object(request):
         metrics = request.POST.getlist('metric[]')
 
         if not inventory_id or not group_id:
-            return redirect('edit_db')
+            logger.error("Inventory или Group не выбраны.")
+            return JsonResponse({'success': False, 'message': 'Inventory или Group не выбраны.'}, status=400)
 
-        inventory = Inventory.objects.get(id_i=inventory_id)
-        group = GroupsModel.objects.get(id_g=group_id)
+        try:
+            inventory = Inventory.objects.get(id_i=inventory_id)
+            group = GroupsModel.objects.get(id_g=group_id)
+        except (Inventory.DoesNotExist, GroupsModel.DoesNotExist) as e:
+            logger.error(f"Ошибка при получении Inventory или Group: {e}")
+            return JsonResponse({'success': False, 'message': f'Ошибка при получении Inventory или Group: {e}'}, status=400)
 
         if object_id:
             obj = Object.objects.get(id_o=object_id)
@@ -294,18 +300,25 @@ def save_object(request):
             obj = Object.objects.create(id_g=group, название="Новый объект")
 
         for standard, requirement in zip(standards, requirements):
-            Standards.objects.create(id_o=obj, стандарт=standard, требование=requirement)
+            existing_standard = Standards.objects.filter(id_o=obj, стандарт=standard, требование=requirement).first()
+            if not existing_standard:
+                Standards.objects.create(id_o=obj, стандарт=standard, требование=requirement)
 
         for test, recommendation, metric in zip(tests, recommendations, metrics):
-            Tests.objects.create(
-                id_o=obj,
-                испытание=test,
-                рекомендация=recommendation,
-                метрика=float(metric)
-            )
+            existing_test = Tests.objects.filter(id_o=obj, испытание=test, рекомендация=recommendation, метрика=float(metric)).first()
+            if not existing_test:
+                Tests.objects.create(
+                    id_o=obj,
+                    испытание=test,
+                    рекомендация=recommendation,
+                    метрика=float(metric)
+                )
 
-        return redirect('edit_db')
-    return redirect('edit_db')
+        logger.debug("Данные успешно сохранены.")
+        return JsonResponse({'success': True, 'message': 'Данные успешно сохранены.'})
+
+    logger.error("Неверный метод запроса.")
+    return JsonResponse({'success': False, 'message': 'Неверный метод запроса.'}, status=405)
 
 @login_required
 def regulations(request):
@@ -403,3 +416,18 @@ def defects(request):
         'selected_group_id': int(selected_group_id) if selected_group_id else None,
         'selected_object_id': int(selected_object_id) if selected_object_id else None,
     })
+@login_required
+def get_regulations(request):
+    object_id = request.GET.get('object')
+    if not object_id:
+        return JsonResponse([], safe=False)
+    regulations = Standards.objects.filter(id_o=object_id).values('id_s', 'стандарт', 'требование')
+    return JsonResponse(list(regulations), safe=False)
+
+@login_required
+def get_defects(request):
+    object_id = request.GET.get('object')
+    if not object_id:
+        return JsonResponse([], safe=False)
+    defects = Tests.objects.filter(id_o=object_id).values('id_def', 'испытание', 'рекомендация', 'метрика')
+    return JsonResponse(list(defects), safe=False)

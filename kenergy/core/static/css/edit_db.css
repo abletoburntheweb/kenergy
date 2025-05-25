@@ -1,4 +1,14 @@
-/* core/static/css/edit_db.css */
+/* ---------------------- ОБЩИЕ СТИЛИ ---------------------- */
+
+body {
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #6e8efb, #a777e3);
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
 
 .header {
     display: flex;
@@ -40,16 +50,6 @@
     color: #6e8efb;
 }
 
-body {
-    font-family: 'Arial', sans-serif;
-    background: linear-gradient(135deg, #6e8efb, #a777e3);
-    margin: 0;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-}
-
 .form-container {
     background-color: #ffffff;
     padding: 40px;
@@ -57,6 +57,8 @@ body {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     width: 800px;
     text-align: center;
+    overflow-y: auto; /* Добавляем прокрутку для всего контейнера */
+    max-height: calc(100vh - 100px); /* Ограничиваем высоту контейнера */
 }
 
 h2 {
@@ -69,6 +71,7 @@ h2 {
     display: flex;
     align-items: center;
     margin-bottom: 15px;
+    margin-top: 20px; /* Смещаем выпадающие списки вниз */
 }
 
 .form-group label {
@@ -100,34 +103,101 @@ h2 {
     margin-top: 20px;
 }
 
+/* ---------------------- ТАБЛИЦЫ ---------------------- */
+
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 20px;
+    font-size: 14px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 8px;
+    overflow: hidden;
+    max-height: 300px; /* Ограничиваем высоту таблицы */
+    overflow-y: auto; /* Добавляем вертикальный скроллбар */
 }
 
-table th, table td {
-    padding: 10px;
-    border: 1px solid #ddd;
-    text-align: left;
-}
-
+/* Заголовки таблицы */
 table th {
-    background-color: #f4f4f4;
+    background-color: #f0f0f0; /* Серый фон для заголовков */
+    color: #333; /* Темный текст */
+    padding: 12px 15px;
+    text-align: left;
+    font-weight: bold;
+    border: none;
 }
 
-.full-width-input {
+/* Ячейки таблицы */
+table td {
+    padding: 10px 15px;
+    border-bottom: 1px solid #f0f0f0;
+    transition: background-color 0.3s ease;
+}
+
+/* Инпуты внутри таблицы */
+table td input[type="text"],
+table td input[type="number"] {
     width: 100%;
-    padding: 5px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
     box-sizing: border-box;
+    transition: border-color 0.3s ease;
 }
 
+/* Эффект при фокусе на инпутах */
+table td input[type="text"]:focus,
+table td input[type="number"]:focus {
+    border-color: #6e8efb;
+    outline: none;
+}
+
+/* Чередование строк для лучшей читаемости */
+table tbody tr:nth-child(odd) {
+    background-color: #fafafa;
+}
+
+table tbody tr:nth-child(even) {
+    background-color: #ffffff;
+}
+
+/* Эффект наведения на строку */
+table tbody tr:hover {
+    background-color: #f0f8ff;
+}
+
+/* Кнопка удаления */
+.remove-row-btn {
+    background-color: #ff4d4d; /* Красный фон */
+    color: white; /* Белый текст */
+    border: none;
+    font-size: 16px; /* Увеличенный размер текста */
+    cursor: pointer;
+    padding: 8px 12px; /* Увеличенные отступы */
+    border-radius: 4px; /* Закругленные углы */
+    transition: background-color 0.3s ease;
+}
+
+.remove-row-btn:hover {
+    background-color: #cc0000; /* Темно-красный при наведении */
+}
+
+/* Действия (последний столбец) */
+table td:last-child {
+    text-align: center;
+}
+
+/* Стиль для кнопок добавления строк */
 .add-row-btn {
+    display: inline-block;
+    margin-top: 15px;
     background-color: #6e8efb;
     color: white;
     border: none;
-    padding: 5px 10px;
+    padding: 8px 15px;
     border-radius: 5px;
+    font-size: 14px;
     cursor: pointer;
     transition: background-color 0.3s ease;
 }
@@ -136,14 +206,10 @@ table th {
     background-color: #5a7de2;
 }
 
-.remove-row-btn {
-    color: red;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-.remove-row-btn:hover {
-    text-decoration: underline;
+.section {
+    margin-top: 30px;
+    border-top: 2px solid #f0f0f0;
+    padding-top: 20px;
 }
 
 .save-button {
