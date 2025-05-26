@@ -172,20 +172,39 @@ table tbody tr:hover {
     background-color: #ff4d4d; /* Красный фон */
     color: white; /* Белый текст */
     border: none;
-    font-size: 16px; /* Увеличенный размер текста */
+    font-size: 16px; /* Размер текста */
     cursor: pointer;
-    padding: 8px 12px; /* Увеличенные отступы */
+    padding: 8px 12px; /* Отступы */
     border-radius: 4px; /* Закругленные углы */
     transition: background-color 0.3s ease;
+    margin-left: 5px; /* Отступ между кнопками */
 }
 
 .remove-row-btn:hover {
     background-color: #cc0000; /* Темно-красный при наведении */
 }
 
+/* Кнопка редактирования */
+.edit-row-btn {
+    background-color: #ffeb3b; /* Желтый фон */
+    color: #333; /* Темный текст */
+    border: none;
+    font-size: 16px; /* Размер текста */
+    cursor: pointer;
+    padding: 8px 12px; /* Отступы */
+    border-radius: 4px; /* Закругленные углы */
+    transition: background-color 0.3s ease;
+    margin-right: 5px; /* Отступ между кнопками */
+}
+
+.edit-row-btn:hover {
+    background-color: #fdd835; /* Темно-желтый при наведении */
+}
+
 /* Действия (последний столбец) */
 table td:last-child {
     text-align: center;
+    white-space: nowrap; /* Предотвращает перенос кнопок */
 }
 
 /* Стиль для кнопок добавления строк */

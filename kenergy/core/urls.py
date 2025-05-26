@@ -36,32 +36,32 @@ urlpatterns = [
     # Инвентарь
     path('inventory/', views.inventory_list, name='inventory_list'),
     path('inventory/create/', views.inventory_create, name='inventory_create'),
-    path('inventory/edit/<int:pk>/', views.inventory_edit, name='inventory_edit'),
-    path('inventory/delete/<int:pk>/', views.inventory_delete, name='inventory_delete'),
+    #path('inventory/edit/<int:pk>/', views.inventory_edit, name='inventory_edit'),
+    #path('inventory/delete/<int:pk>/', views.inventory_delete, name='inventory_delete'),
 
     # Группы
     path('groups/', views.groups_list, name='groups_list'),
     path('groups/create/', views.groups_create, name='groups_create'),
-    path('groups/edit/<int:pk>/', views.groups_edit, name='groups_edit'),
-    path('groups/delete/<int:pk>/', views.groups_delete, name='groups_delete'),
+    #path('groups/edit/<int:pk>/', views.groups_edit, name='groups_edit'),
+    #path('groups/delete/<int:pk>/', views.groups_delete, name='groups_delete'),
 
     # Объекты
     path('object/', views.object_list, name='object_list'),
     path('object/create/', views.object_create, name='object_create'),
-    path('object/edit/<int:pk>/', views.object_edit, name='object_edit'),
-    path('object/delete/<int:pk>/', views.object_delete, name='object_delete'),
+    #path('object/edit/<int:pk>/', views.object_edit, name='object_edit'),
+    #path('object/delete/<int:pk>/', views.object_delete, name='object_delete'),
 
     # Тесты
-    path('tests/', views.tests_list, name='tests_list'),
-    path('tests/create/', views.tests_create, name='tests_create'),
-    path('tests/edit/<int:pk>/', views.tests_edit, name='tests_edit'),
-    path('tests/delete/<int:pk>/', views.tests_delete, name='tests_delete'),
+    #path('tests/', views.tests_list, name='tests_list'),
+    #path('tests/create/', views.tests_create, name='tests_create'),
+    #path('tests/edit/<int:pk>/', views.tests_edit, name='tests_edit'),
+    #path('tests/delete/<int:pk>/', views.tests_delete, name='tests_delete'),
 
     # Стандарты
-    path('standards/', views.standards_list, name='standards_list'),
-    path('standards/create/', views.standards_create, name='standards_create'),
-    path('standards/edit/<int:pk>/', views.standards_edit, name='standards_edit'),
-    path('standards/delete/<int:pk>/', views.standards_delete, name='standards_delete'),
+    #path('standards/', views.standards_list, name='standards_list'),
+    #path('standards/create/', views.standards_create, name='standards_create'),
+    #path('standards/edit/<int:pk>/', views.standards_edit, name='standards_edit'),
+    #path('standards/delete/<int:pk>/', views.standards_delete, name='standards_delete'),
 
     path('api/regulations/', views.get_regulations, name='get_regulations'),
     path('api/defects/', views.get_defects, name='get_defects'),

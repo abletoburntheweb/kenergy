@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Добавление объекта</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/edit_db.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'css/edit_db.css' %}?v=2">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js "></script>
     <script src="{% static 'js/add_object.js' %}"></script>
 </head>
@@ -38,7 +38,6 @@
             </select>
             <button type="button" class="add-button" onclick="openModal('add-group-modal')">+ Добавить группу</button>
         </div>
-        <!-- Выбор объекта -->
         <div class="form-group">
             <label for="main-object-select">Объект:</label>
             <select id="main-object-select" name="object" disabled>
@@ -46,6 +45,7 @@
             </select>
             <button type="button" class="add-button" onclick="openModal('add-object-modal')">+ Добавить объект</button>
         </div>
+
         <div class="section">
             <h3>Регламенты</h3>
             <table id="regulations-table" border="1">
@@ -57,15 +57,11 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><input type="text" name="standard[]" placeholder="Стандарт"></td>
-                        <td><input type="text" name="requirement[]" placeholder="Требование"></td>
-                        <td><button type="button" class="remove-row-btn">×</button></td>
-                    </tr>
                 </tbody>
             </table>
             <button type="button" class="add-row-btn" data-table-id="regulations-table">+</button>
         </div>
+
         <div class="section">
             <h3>Дефекты</h3>
             <table id="defects-table" border="1">
@@ -78,19 +74,15 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td><input type="text" name="test[]" placeholder="Испытания"></td>
-                        <td><input type="text" name="recommendation[]" placeholder="Рекомендуемые действия"></td>
-                        <td><input type="number" name="metric[]" placeholder="Метрика"></td>
-                        <td><button type="button" class="remove-row-btn">×</button></td>
-                    </tr>
                 </tbody>
             </table>
             <button type="button" class="add-row-btn" data-table-id="defects-table">+</button>
         </div>
+
         <button type="submit" class="save-button">Сохранить</button>
         <a href="{% url 'system_settings' %}" class="back-link">Назад</a>
     </div>
+
     <div id="add-inventory-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -107,6 +99,7 @@
             </div>
         </div>
     </div>
+
     <div id="add-group-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -130,36 +123,34 @@
             </div>
         </div>
     </div>
+
     <div id="add-object-modal" class="modal">
-    <div class="modal-content">
-        <div class="modal-header">
-            <h2 class="modal-title">Добавить объект</h2>
-            <span class="close" onclick="closeModal('add-object-modal')">&times;</span>
-        </div>
-        <div class="modal-body">
-<form method="POST" action="{% url 'object_create' %}">
-    {% csrf_token %}
-    <label for="modal-inventory-select">Инвентарь:</label>
-    <select id="modal-inventory-select" name="inventory" required>
-        <option value="">Выберите инвентарь</option>
-        {% for inventory in inventories %}
-            <option value="{{ inventory.id_i }}">{{ inventory.название }}</option>
-        {% endfor %}
-    </select>
-
-    <label for="modal-group-select">Группа:</label>
-    <select id="modal-group-select" name="id_g" required>
-        <option value="">Выберите группу</option>
-    </select>
-
-    <label for="modal-object-name">Название:</label>
-    <input type="text" id="modal-object-name" name="название" required>
-
-    <button type="submit">Сохранить</button>
-</form>
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 class="modal-title">Добавить объект</h2>
+                <span class="close" onclick="closeModal('add-object-modal')">&times;</span>
+            </div>
+            <div class="modal-body">
+                <form method="POST" action="{% url 'object_create' %}">
+                    {% csrf_token %}
+                    <label for="modal-inventory-select">Инвентарь:</label>
+                    <select id="modal-inventory-select" name="inventory" required>
+                        <option value="">Выберите инвентарь</option>
+                        {% for inventory in inventories %}
+                            <option value="{{ inventory.id_i }}">{{ inventory.название }}</option>
+                        {% endfor %}
+                    </select>
+                    <label for="modal-group-select">Группа:</label>
+                    <select id="modal-group-select" name="id_g" required>
+                        <option value="">Выберите группу</option>
+                    </select>
+                    <label for="modal-object-name">Название:</label>
+                    <input type="text" id="modal-object-name" name="название" required>
+                    <button type="submit">Сохранить</button>
+                </form>
+            </div>
         </div>
     </div>
-</div>
 <script>
     function openModal(modalId) {
         const modal = document.getElementById(modalId);

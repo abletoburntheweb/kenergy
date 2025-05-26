@@ -21,7 +21,13 @@ class UserObjectForm(forms.ModelForm):
 class UserTestsForm(forms.ModelForm):
     class Meta:
         model = Tests
-        fields = ['id_o', 'испытание', 'метрика', 'рекомендация']
+        fields = ['испытание', 'рекомендация', 'метрика']
+
+    def clean_метрика(self):
+        метрика = self.cleaned_data['метрика']
+        if метрика < 0:
+            raise forms.ValidationError("Метрика не может быть отрицательной.")
+        return метрика
 
 class UserStandardsForm(forms.ModelForm):
     class Meta:
