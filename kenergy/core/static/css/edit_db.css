@@ -57,8 +57,8 @@ body {
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     width: 800px;
     text-align: center;
-    overflow-y: auto; /* Добавляем прокрутку для всего контейнера */
-    max-height: calc(100vh - 100px); /* Ограничиваем высоту контейнера */
+    overflow-y: auto;
+    max-height: calc(100vh - 100px);
 }
 
 h2 {
@@ -71,7 +71,7 @@ h2 {
     display: flex;
     align-items: center;
     margin-bottom: 15px;
-    margin-top: 20px; /* Смещаем выпадающие списки вниз */
+    margin-top: 20px;
 }
 
 .form-group label {
@@ -113,28 +113,25 @@ table {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 8px;
     overflow: hidden;
-    max-height: 300px; /* Ограничиваем высоту таблицы */
-    overflow-y: auto; /* Добавляем вертикальный скроллбар */
+    max-height: 300px;
+    overflow-y: auto;
 }
 
-/* Заголовки таблицы */
 table th {
-    background-color: #f0f0f0; /* Серый фон для заголовков */
-    color: #333; /* Темный текст */
+    background-color: #f0f0f0;
+    color: #333;
     padding: 12px 15px;
     text-align: left;
     font-weight: bold;
     border: none;
 }
 
-/* Ячейки таблицы */
 table td {
     padding: 10px 15px;
     border-bottom: 1px solid #f0f0f0;
     transition: background-color 0.3s ease;
 }
 
-/* Инпуты внутри таблицы */
 table td input[type="text"],
 table td input[type="number"] {
     width: 100%;
@@ -146,14 +143,12 @@ table td input[type="number"] {
     transition: border-color 0.3s ease;
 }
 
-/* Эффект при фокусе на инпутах */
 table td input[type="text"]:focus,
 table td input[type="number"]:focus {
     border-color: #6e8efb;
     outline: none;
 }
 
-/* Чередование строк для лучшей читаемости */
 table tbody tr:nth-child(odd) {
     background-color: #fafafa;
 }
@@ -162,52 +157,61 @@ table tbody tr:nth-child(even) {
     background-color: #ffffff;
 }
 
-/* Эффект наведения на строку */
 table tbody tr:hover {
     background-color: #f0f8ff;
 }
 
-/* Кнопка удаления */
 .remove-row-btn {
-    background-color: #ff4d4d; /* Красный фон */
-    color: white; /* Белый текст */
+    background-color: #ff4d4d;
+    color: white;
     border: none;
-    font-size: 16px; /* Размер текста */
+    font-size: 16px;
     cursor: pointer;
-    padding: 8px 12px; /* Отступы */
-    border-radius: 4px; /* Закругленные углы */
+    padding: 8px 12px;
+    border-radius: 4px;
     transition: background-color 0.3s ease;
-    margin-left: 5px; /* Отступ между кнопками */
+    margin-left: 5px;
 }
 
 .remove-row-btn:hover {
-    background-color: #cc0000; /* Темно-красный при наведении */
+    background-color: #cc0000;
 }
 
-/* Кнопка редактирования */
 .edit-row-btn {
-    background-color: #ffeb3b; /* Желтый фон */
-    color: #333; /* Темный текст */
+    background-color: #ffeb3b;
+    color: #333;
     border: none;
-    font-size: 16px; /* Размер текста */
+    font-size: 16px;
     cursor: pointer;
-    padding: 8px 12px; /* Отступы */
-    border-radius: 4px; /* Закругленные углы */
+    padding: 8px 12px;
+    border-radius: 4px;
     transition: background-color 0.3s ease;
-    margin-right: 5px; /* Отступ между кнопками */
+    margin-right: 5px;
 }
 
 .edit-row-btn:hover {
-    background-color: #fdd835; /* Темно-желтый при наведении */
+    background-color: #fdd835;
+}
+.save-new-row-btn {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 30px;
+    height: 30px;
 }
 
-/* Действия (последний столбец) */
+.save-new-row-btn:hover {
+    background-color: #218838;
+}
 table td:last-child {
     text-align: center;
-    white-space: nowrap; /* Предотвращает перенос кнопок */
+    white-space: nowrap;
 }
 
-/* Стиль для кнопок добавления строк */
 .add-row-btn {
     display: inline-block;
     margin-top: 15px;

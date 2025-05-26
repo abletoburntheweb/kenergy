@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <title>Добавление объекта</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/edit_db.css' %}?v=2">
+    <link rel="stylesheet" href="{% static 'css/edit_db.css' %}?v=3">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js "></script>
     <script src="{% static 'js/add_object.js' %}"></script>
 </head>
@@ -57,7 +57,17 @@
                     </tr>
                 </thead>
                 <tbody>
-                </tbody>
+    {% for regulation in standards %}
+    <tr data-id="{{ regulation.id_s }}">
+        <td>{{ regulation.стандарт }}</td>
+        <td>{{ regulation.требование }}</td>
+        <td>
+            <button type="button" class="edit-row-btn">✎</button>
+            <button type="button" class="remove-row-btn">×</button>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
             </table>
             <button type="button" class="add-row-btn" data-table-id="regulations-table">+</button>
         </div>
@@ -74,7 +84,18 @@
                     </tr>
                 </thead>
                 <tbody>
-                </tbody>
+    {% for defect in tests %}
+    <tr data-id="{{ defect.id_def }}">
+        <td>{{ defect.испытание }}</td>
+        <td>{{ defect.рекомендация }}</td>
+        <td>{{ defect.метрика }}</td>
+        <td>
+            <button type="button" class="edit-row-btn">✎</button>
+            <button type="button" class="remove-row-btn">×</button>
+        </td>
+    </tr>
+    {% endfor %}
+</tbody>
             </table>
             <button type="button" class="add-row-btn" data-table-id="defects-table">+</button>
         </div>
@@ -83,6 +104,7 @@
         <a href="{% url 'system_settings' %}" class="back-link">Назад</a>
     </div>
 
+    <!-- Модальные окна -->
     <div id="add-inventory-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">

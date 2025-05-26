@@ -2,18 +2,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainInventorySelect = document.getElementById('main-inventory-select');
     const mainGroupSelect = document.getElementById('main-group-select');
     const mainObjectSelect = document.getElementById('main-object-select');
-    const modalInventorySelect = document.getElementById('modal-inventory-select');
-    const modalGroupSelect = document.getElementById('modal-group-select');
 
     if (!mainInventorySelect) console.error('Элемент с id="main-inventory-select" не найден.');
     if (!mainGroupSelect) console.error('Элемент с id="main-group-select" не найден.');
     if (!mainObjectSelect) console.error('Элемент с id="main-object-select" не найден.');
-    if (!modalInventorySelect) console.error('Элемент с id="modal-inventory-select" не найден.');
-    if (!modalGroupSelect) console.error('Элемент с id="modal-group-select" не найден.');
-
-    mainGroupSelect.innerHTML = '<option value="">Выберите группу</option>';
-    mainObjectSelect.innerHTML = '<option value="">Выберите объект</option>';
-    modalGroupSelect.innerHTML = '<option value="">Выберите группу</option>';
 
     function populateDropdown(selectElement, data) {
         selectElement.innerHTML = '<option value="">Выберите</option>';
@@ -32,24 +24,25 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     function updateGroups(inventoryId, groupSelect) {
-        if (inventoryId) {
-            fetch(`/api/groups/?inventory=${inventoryId}`)
-                .then(response => {
-                    if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Полученные группы:', data);
-                    populateDropdown(groupSelect, data);
-                })
-                .catch(error => {
-                    console.error('Ошибка при получении групп:', error.message);
-                    alert('Не удалось загрузить список групп.');
-                });
-        } else {
-            clearDropdown(groupSelect);
-        }
+    if (inventoryId) {
+        console.log('Запрос групп для инвентаря:', inventoryId);
+        fetch(`/api/groups/?inventory=${inventoryId}`)
+            .then(response => {
+                if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                console.log('Полученные группы:', data);
+                populateDropdown(groupSelect, data);
+            })
+            .catch(error => {
+                console.error('Ошибка при получении групп:', error.message);
+                alert('Не удалось загрузить список групп.');
+            });
+    } else {
+        clearDropdown(groupSelect);
     }
+}
 
     function updateObjects(groupId, objectSelect) {
         if (groupId) {
@@ -71,11 +64,46 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    function updateUrlParams(params) {
+        const url = new URL(window.location.href);
+        Object.keys(params).forEach(key => {
+            if (params[key]) {
+                url.searchParams.set(key, params[key]);
+            } else {
+                url.searchParams.delete(key);
+            }
+        });
+        window.history.pushState({}, '', url);
+    }
+
+    function initializeFromUrl() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const inventoryId = urlParams.get('inventory');
+        const groupId = urlParams.get('group');
+        const objectId = urlParams.get('object');
+
+        if (inventoryId) {
+            mainInventorySelect.value = inventoryId;
+            updateGroups(inventoryId, mainGroupSelect);
+        }
+
+        if (groupId) {
+            mainGroupSelect.value = groupId;
+            updateObjects(groupId, mainObjectSelect);
+        }
+
+        if (objectId) {
+            mainObjectSelect.value = objectId;
+            updateRegulationsAndDefects(objectId);
+        }
+    }
+
     if (mainInventorySelect && mainGroupSelect) {
         mainInventorySelect.addEventListener('change', () => {
             const inventoryId = mainInventorySelect.value;
             clearDropdown(mainGroupSelect);
             clearDropdown(mainObjectSelect);
+            updateUrlParams({ inventory: inventoryId, group: null, object: null });
             if (inventoryId) {
                 updateGroups(inventoryId, mainGroupSelect);
             }
@@ -86,21 +114,27 @@ document.addEventListener('DOMContentLoaded', () => {
         mainGroupSelect.addEventListener('change', () => {
             const groupId = mainGroupSelect.value;
             clearDropdown(mainObjectSelect);
+            updateUrlParams({ group: groupId, object: null });
             if (groupId) {
                 updateObjects(groupId, mainObjectSelect);
             }
         });
     }
 
-    if (modalInventorySelect && modalGroupSelect) {
-        modalInventorySelect.addEventListener('change', () => {
-            const inventoryId = modalInventorySelect.value;
-            clearDropdown(modalGroupSelect);
-            if (inventoryId) {
-                updateGroups(inventoryId, modalGroupSelect);
+    if (mainObjectSelect) {
+        mainObjectSelect.addEventListener('change', () => {
+            const objectId = mainObjectSelect.value;
+            updateUrlParams({ object: objectId });
+            if (objectId) {
+                updateRegulationsAndDefects(objectId);
+            } else {
+                document.querySelector('#regulations-table tbody').innerHTML = '';
+                document.querySelector('#defects-table tbody').innerHTML = '';
             }
         });
     }
+
+    initializeFromUrl();
 
     function handleModalFormSubmit(modalSelector, selectId, callback) {
         const modal = document.querySelector(modalSelector);
@@ -191,96 +225,120 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     };
 
-    document.querySelectorAll('.add-row-btn').forEach(button => {
+document.querySelectorAll('.add-row-btn').forEach(button => {
     button.addEventListener('click', () => {
         const tableId = button.getAttribute('data-table-id');
         const table = document.getElementById(tableId);
         const newRow = document.createElement('tr');
+
         if (tableId === 'regulations-table') {
             newRow.innerHTML = `
                 <td><input type="text" name="standard[]" placeholder="Стандарт"></td>
                 <td><input type="text" name="requirement[]" placeholder="Требование"></td>
                 <td>
+                    <button type="button" class="save-new-row-btn">+</button>
                     <button type="button" class="remove-row-btn">×</button>
                 </td>
             `;
         } else if (tableId === 'defects-table') {
             newRow.innerHTML = `
-    <td><input type="text" name="test[]" placeholder="Испытания"></td>
-    <td><input type="text" name="recommendation[]" placeholder="Рекомендуемые действия"></td>
-    <td><input type="number" name="metric[]" placeholder="Метрика" min="0"></td>
-    <td>
-        <button type="button" class="remove-row-btn">×</button>
-    </td>
-`;
+                <td><input type="text" name="test[]" placeholder="Испытания"></td>
+                <td><input type="text" name="recommendation[]" placeholder="Рекомендуемые действия"></td>
+                <td><input type="number" name="metric[]" placeholder="Метрика" min="0"></td>
+                <td>
+                    <button type="button" class="save-new-row-btn">+</button>
+                    <button type="button" class="remove-row-btn">×</button>
+                </td>
+            `;
         }
+
         table.querySelector('tbody').appendChild(newRow);
+
+        newRow.querySelector('.save-new-row-btn').addEventListener('click', () => {
+            const cells = newRow.querySelectorAll('td');
+            const data = {};
+            const objectId = document.getElementById('main-object-select').value;
+
+            if (!objectId) {
+                alert('Выберите объект перед сохранением.');
+                return;
+            }
+
+            if (tableId === 'regulations-table') {
+                data.standard = cells[0].querySelector('input').value.trim();
+                data.requirement = cells[1].querySelector('input').value.trim();
+            } else if (tableId === 'defects-table') {
+                data.test = cells[0].querySelector('input').value.trim();
+                data.recommendation = cells[1].querySelector('input').value.trim();
+                data.metric = parseFloat(cells[2].querySelector('input').value.trim());
+            }
+
+            fetch('/save-new-row/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value,
+                },
+                body: JSON.stringify({
+                    object_id: objectId,
+                    table: tableId,
+                    data: data,
+                }),
+            })
+            .then(response => {
+                if (!response.ok) throw new Error('Ошибка при сохранении данных.');
+                return response.json();
+            })
+            .then(result => {
+                if (result.success) {
+                    newRow.dataset.id = result.id;
+                    cells[0].textContent = data.standard || data.test || '—';
+                    cells[1].textContent = data.requirement || data.recommendation || '—';
+                    if (tableId === 'defects-table') {
+                        cells[2].textContent = data.metric || '—';
+                    }
+                    cells[cells.length - 1].innerHTML = `
+                        <button type="button" class="edit-row-btn">✎</button>
+                        <button type="button" class="remove-row-btn">×</button>
+                    `;
+                    alert('Строка успешно добавлена.');
+                } else {
+                    alert('Произошла ошибка при сохранении данных.');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Не удалось сохранить строку.');
+            });
+        });
+
+        newRow.querySelector('.remove-row-btn').addEventListener('click', () => {
+            newRow.remove();
+        });
     });
 });
-
-    document.addEventListener('click', (event) => {
-        if (event.target.classList.contains('remove-row-btn')) {
-            const row = event.target.closest('tr');
-            if (row.parentNode.children.length > 1) {
-                row.remove();
-            }
-        }
-    });
-
-    document.querySelector('.save-button').addEventListener('click', () => {
-    const inventory = document.getElementById('main-inventory-select').value;
-    const group = document.getElementById('main-group-select').value;
-    const object = document.getElementById('main-object-select').value;
-    if (!inventory || !group || !object) {
-        alert('Пожалуйста, выберите инвентарь, группу и объект.');
-        return;
-    }
-
-    const standards = Array.from(document.querySelectorAll('[name="standard[]"]')).map(input => input.value.trim());
-    const requirements = Array.from(document.querySelectorAll('[name="requirement[]"]')).map(input => input.value.trim());
-    const tests = Array.from(document.querySelectorAll('[name="test[]"]')).map(input => input.value.trim());
-    const recommendations = Array.from(document.querySelectorAll('[name="recommendation[]"]')).map(input => input.value.trim());
-    const metrics = Array.from(document.querySelectorAll('[name="metric[]"]')).map(input => input.value.trim());
-
-    if (
-        standards.some(value => value === '') ||
-        requirements.some(value => value === '') ||
-        tests.some(value => value === '') ||
-        recommendations.some(value => value === '') ||
-        metrics.some(value => value === '')
-    ) {
-        alert('Пожалуйста, заполните все обязательные поля.');
-        return;
-    }
+document.querySelector('.save-button').addEventListener('click', () => {
+    const formData = collectFormData();
+    if (!formData) return;
 
     const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]').value;
-    const formData = new FormData();
-    formData.append('inventory', inventory);
-    formData.append('group', group);
-    formData.append('object', object);
-    standards.forEach((standard, index) => formData.append(`standard[]`, standard));
-    requirements.forEach((requirement, index) => formData.append(`requirement[]`, requirement));
-    tests.forEach((test, index) => formData.append(`test[]`, test));
-    recommendations.forEach((recommendation, index) => formData.append(`recommendation[]`, recommendation));
-    metrics.forEach((metric, index) => formData.append(`metric[]`, metric));
 
     fetch('/save-object/', {
         method: 'POST',
         headers: {
+            'Content-Type': 'application/json',
             'X-CSRFToken': csrfToken,
         },
-        body: formData,
+        body: JSON.stringify(formData),
     })
     .then(response => {
-        if (!response.ok) {
-            throw new Error('Ошибка при сохранении данных.');
-        }
+        if (!response.ok) throw new Error('Ошибка при сохранении данных.');
         return response.json();
     })
     .then(data => {
         if (data.success) {
             alert('Данные успешно сохранены.');
-            updateRegulationsAndDefects(object);
+            updateRegulationsAndDefects(formData.object);
         } else {
             alert('Произошла ошибка при сохранении данных.');
         }
@@ -290,7 +348,6 @@ document.addEventListener('DOMContentLoaded', () => {
         alert('Не удалось сохранить данные.');
     });
 });
-
     function updateRegulationsAndDefects(objectId) {
     fetch(`/api/regulations/?object=${objectId}`)
         .then(response => response.json())
@@ -303,6 +360,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             data.forEach(regulation => {
                 const row = regulationsTable.insertRow();
+                row.dataset.id = regulation.id_s;
                 row.insertCell(0).textContent = regulation.стандарт || '—';
                 row.insertCell(1).textContent = regulation.требование || '—';
                 row.insertCell(2).innerHTML = `
@@ -327,6 +385,7 @@ document.addEventListener('DOMContentLoaded', () => {
             }
             data.forEach(defect => {
                 const row = defectsTable.insertRow();
+                row.dataset.id = defect.id_def;
                 row.insertCell(0).textContent = defect.испытание || '—';
                 row.insertCell(1).textContent = defect.рекомендация || '—';
                 row.insertCell(2).textContent = defect.метрика || '—';
@@ -342,20 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
         });
 }
 
-    const selectedObjectId = mainObjectSelect.value;
-    if (selectedObjectId) {
-        updateRegulationsAndDefects(selectedObjectId);
-    }
-
-    mainObjectSelect.addEventListener('change', () => {
-        const objectId = mainObjectSelect.value;
-        if (objectId) {
-            updateRegulationsAndDefects(objectId);
-        } else {
-            document.querySelector('#regulations-table tbody').innerHTML = '';
-            document.querySelector('#defects-table tbody').innerHTML = '';
-        }
-    });
+    initializeFromUrl();
 
 document.addEventListener('click', (event) => {
     if (event.target.classList.contains('edit-row-btn')) {
@@ -365,7 +411,7 @@ document.addEventListener('click', (event) => {
         let isEditing = false;
 
         cells.forEach((cell, index) => {
-            if (index === cells.length - 1) return; // Пропускаем последнюю ячейку (с кнопками)
+            if (index === cells.length - 1) return;
             if (cell.querySelector('input')) {
                 isEditing = true;
                 return;
@@ -373,40 +419,143 @@ document.addEventListener('click', (event) => {
         });
 
         if (!isEditing) {
-            // Переключение в режим редактирования
             cells.forEach((cell, index) => {
-                if (index === cells.length - 1) return; // Пропускаем последнюю ячейку (с кнопками)
+                if (index === cells.length - 1) return;
                 const content = cell.textContent.trim();
-                if (cell.querySelector('input[type="number"]')) {
+                if (index === 2 && tableId === 'defects-table') {
                     cell.innerHTML = `<input type="number" value="${content}" placeholder="Метрика" min="0">`;
                 } else {
                     cell.innerHTML = `<input type="text" value="${content}">`;
                 }
             });
         } else {
-            // Сохранение изменений
+            const data = {};
             cells.forEach((cell, index) => {
-                if (index === cells.length - 1) return; // Пропускаем последнюю ячейку (с кнопками)
+                if (index === cells.length - 1) return;
                 const input = cell.querySelector('input');
                 if (input) {
                     if (input.type === 'number') {
                         const value = parseFloat(input.value);
                         cell.textContent = isNaN(value) || value < 0 ? '' : value;
+                        if (tableId === 'defects-table' && index === 2) {
+                            data.metric = cell.textContent;
+                        }
                     } else {
                         cell.textContent = input.value.trim();
+                        if (tableId === 'regulations-table') {
+                            if (index === 0) data.standard = cell.textContent;
+                            if (index === 1) data.requirement = cell.textContent;
+                        } else if (tableId === 'defects-table') {
+                            if (index === 0) data.test = cell.textContent;
+                            if (index === 1) data.recommendation = cell.textContent;
+                        }
                     }
                 }
             });
-            saveRowChanges(row, tableId); // Вызов функции сохранения
+
+            saveRowChanges(row, tableId);
         }
     }
+
+    if (event.target.classList.contains('remove-row-btn')) {
+        const row = event.target.closest('tr');
+        const tableId = row.closest('table').id;
+        const cells = row.querySelectorAll('td');
+        const data = {};
+
+        if (tableId === 'regulations-table') {
+            data.standard = cells[0].textContent.trim();
+            data.requirement = cells[1].textContent.trim();
+        } else if (tableId === 'defects-table') {
+            data.test = cells[0].textContent.trim();
+            data.recommendation = cells[1].textContent.trim();
+            data.metric = parseFloat(cells[2].textContent.trim());
+        }
+
+        const objectId = document.getElementById('main-object-select').value;
+        if (!objectId) {
+            alert('Выберите объект перед удалением.');
+            return;
+        }
+
+        fetch('/delete-row/', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value,
+            },
+            body: JSON.stringify({
+                object_id: objectId,
+                table: tableId,
+                data: data,
+            }),
+        })
+        .then(response => {
+            if (!response.ok) throw new Error('Ошибка при удалении данных.');
+            return response.json();
+        })
+        .then(data => {
+            if (data.success) {
+                alert('Строка успешно удалена.');
+                row.remove();
+            } else {
+                alert('Произошла ошибка при удалении данных.');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка:', error);
+            alert('Не удалось удалить строку.');
+        });
+    }
 });
+function collectFormData() {
+    const inventory = document.getElementById('main-inventory-select').value;
+    const group = document.getElementById('main-group-select').value;
+    const object = document.getElementById('main-object-select').value;
 
-function saveRowChanges(row) {
-    const tableId = row.closest('table').id;
+    if (!inventory || !group || !object) {
+        alert('Пожалуйста, выберите инвентарь, группу и объект.');
+        return null;
+    }
+
+    const regulationsTable = document.querySelector('#regulations-table tbody');
+    const regulations = Array.from(regulationsTable.rows).map(row => {
+        const cells = row.cells;
+        return {
+            id_s: row.dataset.id,
+            standard: cells[0].textContent.trim(),
+            requirement: cells[1].textContent.trim(),
+        };
+    });
+
+    const defectsTable = document.querySelector('#defects-table tbody');
+    const defects = Array.from(defectsTable.rows).map(row => {
+        const cells = row.cells;
+        return {
+            id_def: row.dataset.id,
+            test: cells[0].textContent.trim(),
+            recommendation: cells[1].textContent.trim(),
+            metric: parseFloat(cells[2].textContent.trim()),
+        };
+    });
+
+    return {
+        inventory,
+        group,
+        object,
+        standards: regulations,
+        tests: defects,
+    };
+}
+function saveRowChanges(row, tableId) {
     const cells = row.querySelectorAll('td');
-    const data = {};
+    const rowId = row.dataset.id;
+    if (!rowId) {
+        alert('Ошибка: уникальный идентификатор строки отсутствует.');
+        return;
+    }
 
+    const data = {};
     if (tableId === 'regulations-table') {
         data.standard = cells[0].textContent.trim();
         data.requirement = cells[1].textContent.trim();
@@ -415,6 +564,7 @@ function saveRowChanges(row) {
         data.recommendation = cells[1].textContent.trim();
         data.metric = parseFloat(cells[2].textContent.trim());
     }
+    data.id = rowId;
 
     const objectId = document.getElementById('main-object-select').value;
     if (!objectId) {
@@ -451,20 +601,12 @@ function saveRowChanges(row) {
     });
 }
 
-// Ограничение ввода отрицательных значений
-document.addEventListener('input', (event) => {
-    if (event.target.tagName === 'INPUT' && event.target.type === 'number') {
-        const value = parseFloat(event.target.value);
-        if (isNaN(value) || value < 0) {
-            event.target.value = ''; // Очищаем поле, если значение отрицательное или некорректное
+    document.addEventListener('input', (event) => {
+        if (event.target.tagName === 'INPUT' && event.target.type === 'number') {
+            const value = parseFloat(event.target.value);
+            if (isNaN(value) || value < 0) {
+                event.target.value = '';
+            }
         }
-    }
-});
-function saveRowChanges(row) {
-    const inputs = row.querySelectorAll('input');
-    inputs.forEach((input, index) => {
-        const cell = row.cells[index];
-        cell.textContent = input.value;
     });
-}
 });

@@ -1,3 +1,4 @@
+import json
 import sys
 import logging
 from django.contrib.auth import authenticate, login
@@ -41,7 +42,6 @@ def inventory_list(request):
     inventories = Inventory.objects.all()
     return render(request, 'core/inventory_list.html', {'inventories': inventories})
 
-@login_required
 @login_required
 def inventory_create(request):
     if request.method == 'POST':
@@ -321,6 +321,39 @@ def save_object(request):
     return JsonResponse({'success': False, 'message': 'Неверный метод запроса.'}, status=405)
 
 @login_required
+def save_new_row(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            object_id = data.get('object_id')
+            table = data.get('table')
+            row_data = data.get('data')
+
+            obj = Object.objects.get(id_o=object_id)
+
+            if table == 'regulations-table':
+                standard = Standards.objects.create(
+                    id_o=obj,
+                    стандарт=row_data.get('standard'),
+                    требование=row_data.get('requirement')
+                )
+                return JsonResponse({'success': True, 'id': standard.id_s})
+            elif table == 'defects-table':
+                test = Tests.objects.create(
+                    id_o=obj,
+                    испытание=row_data.get('test'),
+                    рекомендация=row_data.get('recommendation'),
+                    метрика=row_data.get('metric')
+                )
+                return JsonResponse({'success': True, 'id': test.id_def})
+
+        except Exception as e:
+            logger.error(f"Ошибка при сохранении новой строки: {e}")
+            return JsonResponse({'success': False, 'message': 'Произошла ошибка при сохранении данных.'}, status=500)
+
+    return JsonResponse({'success': False, 'message': 'Неверный метод запроса.'}, status=405)
+
+@login_required
 def regulations(request):
     inventories = Inventory.objects.all()
 
@@ -431,3 +464,66 @@ def get_defects(request):
         return JsonResponse([], safe=False)
     defects = Tests.objects.filter(id_o=object_id).values('id_def', 'испытание', 'рекомендация', 'метрика')
     return JsonResponse(list(defects), safe=False)
+
+@login_required
+def update_row(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            object_id = data.get('object_id')
+            table = data.get('table')
+            row_data = data.get('data')
+
+            row_id = row_data.get('id')
+            if not row_id:
+                return JsonResponse({'success': False, 'message': 'Уникальный идентификатор строки отсутствует.'}, status=400)
+
+            if table == 'regulations-table':
+                standard = row_data.get('standard')
+                requirement = row_data.get('requirement')
+                Standards.objects.filter(id_o=object_id, id_s=row_id).update(
+                    стандарт=standard,
+                    требование=requirement
+                )
+            elif table == 'defects-table':
+                test = row_data.get('test')
+                recommendation = row_data.get('recommendation')
+                metric = row_data.get('metric')
+                Tests.objects.filter(id_o=object_id, id_def=row_id).update(
+                    испытание=test,
+                    рекомендация=recommendation,
+                    метрика=metric
+                )
+
+            return JsonResponse({'success': True, 'message': 'Данные успешно обновлены.'})
+        except Exception as e:
+            logger.error(f"Ошибка при обновлении строки: {e}")
+            return JsonResponse({'success': False, 'message': 'Произошла ошибка при обновлении данных.'}, status=500)
+
+    return JsonResponse({'success': False, 'message': 'Неверный метод запроса.'}, status=405)
+
+@login_required
+def delete_row(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            object_id = data.get('object_id')
+            table = data.get('table')
+            row_data = data.get('data')
+
+            if table == 'regulations-table':
+                standard = row_data.get('standard')
+                requirement = row_data.get('requirement')
+                Standards.objects.filter(id_o=object_id, стандарт=standard, требование=requirement).delete()
+            elif table == 'defects-table':
+                test = row_data.get('test')
+                recommendation = row_data.get('recommendation')
+                metric = row_data.get('metric')
+                Tests.objects.filter(id_o=object_id, испытание=test, рекомендация=recommendation, метрика=metric).delete()
+
+            return JsonResponse({'success': True, 'message': 'Данные успешно удалены.'})
+        except Exception as e:
+            logger.error(f"Ошибка при удалении строки: {e}")
+            return JsonResponse({'success': False, 'message': 'Произошла ошибка при удалении данных.'}, status=500)
+
+    return JsonResponse({'success': False, 'message': 'Неверный метод запроса.'}, status=405)
