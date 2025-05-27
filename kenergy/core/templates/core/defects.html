@@ -1,106 +1,131 @@
-<!-- core/templates/core/defects.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Дефекты</title>
+    <title>Тесты и метрики</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/defects.css' %}">
+    <link rel="stylesheet" href="{% static 'css/defects.css' %}?v=2">
 </head>
 <body>
+
 <div class="header">
-        <div class="welcome-message">
-            Добро пожаловать, {{ request.user.username }}!
+    <div class="welcome-message">Добро пожаловать, {{ request.user.username }}!</div>
+    <div class="logout-button"><a href="{% url 'logout' %}">Выйти</a></div>
+</div>
+
+<div class="form-container">
+    <h2>Проверка метрик</h2>
+
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="inventory">Основная группа</label>
+            <select id="inventory" name="inventory" onchange="location.href='?inventory=' + this.value">
+                <option value="">Выберите категорию</option>
+                {% for inv in inventories %}
+                    <option value="{{ inv.id_i }}"
+                        {% if selected_inventory_id == inv.id_i %}
+                            selected
+                        {% endif %}>
+                        {{ inv.название }}
+                    </option>
+                {% endfor %}
+            </select>
         </div>
-        <div class="logout-button">
-            <a href="{% url 'logout' %}" class="btn-logout">Выйти</a>
+
+        <div class="form-group">
+            <label for="group">Подгруппа</label>
+            <select id="group" name="group"
+                    onchange="location.href='?inventory={{ selected_inventory_id }}&group=' + this.value"
+                    {% if not groups %}disabled{% endif %}>
+                <option value="">Выберите группу</option>
+                {% for group in groups %}
+                    <option value="{{ group.id_g }}"
+                        {% if selected_group_id == group.id_g %}
+                            selected
+                        {% endif %}>
+                        {{ group.название }}
+                    </option>
+                {% endfor %}
+            </select>
         </div>
-    </div>
-    <div class="form-container">
-        <h2>Дефекты</h2>
 
-        <form method="get">
-            <div class="form-group">
-                <label for="inventory-select">Основная группа</label>
-                <select id="inventory-select" name="inventory" onchange="this.form.submit()">
-                    <option value="">Выберите основную группу</option>
-                    {% for inventory in inventories %}
-                        <option value="{{ inventory.id_i }}" {% if inventory.id_i == selected_inventory_id %}selected{% endif %}>
-                            {{ inventory.name }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
+        <div class="form-group">
+            <label for="object">Объект</label>
+            <select id="object" name="object"
+                    onchange="location.href='?inventory={{ selected_inventory_id }}&group={{ selected_group_id }}&object=' + this.value"
+                    {% if not objects %}disabled{% endif %}>
+                <option value="">Выберите объект</option>
+                {% for obj in objects %}
+                    <option value="{{ obj.id_o }}"
+                        {% if selected_object_id == obj.id_o %}
+                            selected
+                        {% endif %}>
+                        {{ obj.название }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
 
-            {% if groups %}
-                <div class="form-group">
-                    <label for="group-select">Подгруппа</label>
-                    <select id="group-select" name="group" onchange="this.form.submit()">
-                        <option value="">Выберите подгруппу</option>
-                        {% for group in groups %}
-                            <option value="{{ group.id_g }}" {% if group.id_g == selected_group_id %}selected{% endif %}>
-                                {{ group.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-            {% endif %}
+        <button type="button" onclick="location.href='{% url 'system_settings' %}'" class="btn">Назад</button>
 
-            {% if objects %}
-                <div class="form-group">
-                    <label for="object-select">Объект</label>
-                    <select id="object-select" name="object" onchange="this.form.submit()">
-                        <option value="">Выберите объект</option>
-                        {% for obj in objects %}
-                            <option value="{{ obj.id_o }}" {% if obj.id_o == selected_object_id %}selected{% endif %}>
-                                {{ obj.name }}
-                            </option>
-                        {% endfor %}
-                    </select>
-                </div>
-            {% endif %}
-
-            <button type="button" onclick="location.href='{% url 'system_settings' %}'" class="btn">Назад</button>
-        </form>
-
-        <form method="post">
-            {% csrf_token %}
-            <div class="tables-container">
-                <div class="left-table">
-                    <table>
-                        <thead>
+        <!-- Контейнер с таблицей и скроллом -->
+        {% if tests %}
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Испытание</th>
+                            <th>Полученные данные</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for test in tests %}
                             <tr>
-                                <th>Дефект</th>
-                                <th></th>
+                                <td>{{ test.испытание }}</td>
+                                <td>
+                                    <input type="text" name="metric_{{ test.id_def }}" placeholder="Введите значение">
+                                </td>
                             </tr>
-                        </thead>
-                        <tbody>
-                            {% for defect in defects %}
-                                <tr>
-                                    <td>{{ defect.fact }}</td>
-                                    <td>
-                                        <input type="checkbox" name="defect" value="{{ defect.id_def }}">
-                                    </td>
-                                </tr>
-                            {% empty %}
-                                <tr>
-                                    <td colspan="2">Нет дефектов</td>
-                                </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="right-table">
-                    <button type="submit" class="btn">Проверить пригодность</button>
-                    {% if verdict %}
-                        <p><strong>Вердикт:</strong> {{ verdict }}</p>
-                    {% else %}
-                        <p>Выберите дефекты для проверки пригодности.</p>
-                    {% endif %}
+                        {% empty %}
+                            <tr>
+                                <td colspan="2">Нет тестов для выбранного объекта.</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            <button type="submit" class="btn">Продолжить</button>
+        {% elif selected_object_id %}
+            <p>Нет тестов для выбранного объекта.</p>
+        {% endif %}
+    </form>
+
+    <!-- Результаты сравнения -->
+    {% if show_results %}
+        {% if discrepancies %}
+            <div class="unmet-requirements">
+                <h3>Несоответствия:</h3>
+                <div class="unmet-container">
+                    <ul>
+                        {% for test in discrepancies %}
+                            <li>
+                                <strong>{{ test.испытание }}</strong><br>
+                                <em>Рекомендация:</em> {{ test.рекомендация }}
+                            </li>
+                        {% endfor %}
+                    </ul>
                 </div>
             </div>
-        </form>
-    </div>
+        {% else %}
+            <div class="success-message">
+                ✅ Все тесты пройдены успешно.
+            </div>
+        {% endif %}
+    {% endif %}
+</div>
+
 </body>
 </html>

@@ -1,97 +1,130 @@
-<!-- core/templates/core/regulations.html -->
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Регламенты</title>
+    <title>Стандарты</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/regulations.css' %}">
+    <link rel="stylesheet" href="{% static 'css/regulations.css' %}?v=2">
 </head>
 <body>
+
 <div class="header">
-        <div class="welcome-message">
-            Добро пожаловать, {{ request.user.username }}!
-        </div>
-        <div class="logout-button">
-            <a href="{% url 'logout' %}" class="btn-logout">Выйти</a>
-        </div>
-    </div>
-    <div class="form-container">
-        <h2>Регламенты</h2>
+    <div class="welcome-message">Добро пожаловать, {{ request.user.username }}!</div>
+    <div class="logout-button"><a href="{% url 'logout' %}">Выйти</a></div>
+</div>
 
-        <form method="get">
-            <div class="form-group">
-                <label for="inventory-select">Основная группа</label>
-                <select id="inventory-select" name="inventory" onchange="this.form.submit()">
-                    <option value="">Выберите категорию</option>
-                    {% for inventory in inventories %}
-                        <option value="{{ inventory.id_i }}" {% if inventory.id_i == selected_inventory_id %}selected{% endif %}>
-                            {{ inventory.название }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="group-select">Подгруппа</label>
-                <select id="group-select" name="group" onchange="this.form.submit()">
-                    <option value="">Выберите группу</option>
-                    {% for group in groups %}
-                        <option value="{{ group.id_g }}" {% if group.id_g == selected_group_id %}selected{% endif %}>
-                            {{ group.название }}
-                        </option>
-                    {% endfor %}
-                </select>
-            </div>
-            <button type="button" onclick="location.href='{% url 'system_settings' %}'" class="btn">Назад</button>
-        </form>
+<div class="form-container">
+    <h2>Стандарты</h2>
 
-        <div class="tables-container">
-            <div class="left-table">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Объект</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for obj in objects %}
-                            <tr>
-                                <td>
-                                    <a href="?inventory={{ selected_inventory_id }}&group={{ selected_group_id }}&object={{ obj.id_o }}">
-                                        {{ obj.название }}
-                                    </a>
-                                </td>
-                            </tr>
-                        {% empty %}
-                            <tr>
-                                <td>Нет объектов</td>
-                            </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="right-table">
+    <form method="post">
+        {% csrf_token %}
+
+        <div class="form-group">
+            <label for="inventory">Основная группа</label>
+            <select id="inventory" name="inventory" onchange="this.form.submit()">
+                <option value="">Выберите категорию</option>
+                {% for inv in inventories %}
+                    <option value="{{ inv.id_i }}"
+                        {% if selected_inventory and inv.id_i|stringformat:'s' == selected_inventory|stringformat:'s' %}
+                            selected
+                        {% endif %}>
+                        {{ inv.название }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="group">Подгруппа</label>
+            <select id="group" name="group" onchange="this.form.submit()" {% if not groups %}disabled{% endif %}>
+                <option value="">Выберите группу</option>
+                {% for group in groups %}
+                    <option value="{{ group.id_g }}"
+                        {% if selected_group and group.id_g|stringformat:'s' == selected_group|stringformat:'s' %}
+                            selected
+                        {% endif %}>
+                        {{ group.название }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="object">Объект</label>
+            <select id="object" name="object" onchange="this.form.submit()" {% if not objects %}disabled{% endif %}>
+                <option value="">Выберите объект</option>
+                {% for obj in objects %}
+                    <option value="{{ obj.id_o }}"
+                        {% if selected_object and obj.id_o|stringformat:'s' == selected_object|stringformat:'s' %}
+                            selected
+                        {% endif %}>
+                        {{ obj.название }}
+                    </option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <button type="button" onclick="location.href='{% url 'system_settings' %}'" class="btn">Назад</button>
+
+        <!-- Таблица стандартов -->
+        {% if standards %}
+            <div class="table-container">
                 <table>
                     <thead>
                         <tr>
                             <th>Стандарт</th>
+                            <th>Выполнено</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for standard in standards %}
+                        {% for std in standards %}
                             <tr>
-                                <td>{{ standard.факт }}</td>
+                                <td>{{ std.стандарт }}</td>
+                                <td>
+                                    <input type="checkbox" name="standard_checkbox" value="{{ std.id_s }}">
+                                </td>
                             </tr>
                         {% empty %}
                             <tr>
-                                <td>Нет стандартов</td>
+                                <td colspan="2">Нет стандартов для выбранного объекта.</td>
                             </tr>
                         {% endfor %}
                     </tbody>
                 </table>
             </div>
-        </div>
-    </div>
+
+            <button type="submit" name="continue_button" value="true" class="btn">Продолжить</button>
+        {% elif selected_object %}
+            <p>Нет стандартов для выбранного объекта.</p>
+        {% endif %}
+    </form>
+
+    <!-- Сообщения пользователю -->
+    {% if show_requirements %}
+        {% if all_met %}
+            <div class="success-message">
+                ✅ Все стандарты выполнены.
+            </div>
+        {% else %}
+            <div class="unmet-requirements">
+                <h3>Необходимые требования:</h3>
+                <div class="unmet-container">
+                    <ul>
+                        {% for req in unmet_requirements %}
+                            <li>
+                                <strong>{{ req.стандарт }}:</strong> {{ req.требование }}
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            </div>
+        {% endif %}
+    {% else %}
+        {% if standards %}
+            <p class="instruction">Отметьте выполненные стандарты и нажмите «Продолжить»</p>
+        {% endif %}
+    {% endif %}
+</div>
+
 </body>
 </html>
