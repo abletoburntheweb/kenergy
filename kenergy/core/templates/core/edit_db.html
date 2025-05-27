@@ -7,7 +7,6 @@
     {% load static %}
     <link rel="stylesheet" href="{% static 'css/edit_db.css' %}?v=1">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js "></script>
-    <script src="{% static 'js/add_object.js' %}"></script>
 </head>
 <body>
     <div class="header">
@@ -21,32 +20,92 @@
     <div class="form-container">
         <h2>Добавление объекта</h2>
         <div class="form-group">
-            <label for="main-inventory-select">Инвентарь:</label>
-            <select id="main-inventory-select" name="inventory">
-                <option value="">Выберите инвентарь</option>
-                {% for inventory in inventories %}
-                    <option value="{{ inventory.id_i }}" {% if inventory.id_i == selected_inventory_id %}selected{% endif %}>
-                        {{ inventory.название }}
-                    </option>
-                {% endfor %}
-            </select>
-            <button type="button" class="add-button" onclick="openModal('add-inventory-modal')">+ Добавить инвентарь</button>
-        </div>
-        <div class="form-group">
-            <label for="main-group-select">Группа:</label>
-            <select id="main-group-select" name="group" disabled>
-                <option value="">Выберите группу</option>
-            </select>
-            <button type="button" class="add-button" onclick="openModal('add-group-modal')">+ Добавить группу</button>
-        </div>
-        <div class="form-group">
-            <label for="main-object-select">Объект:</label>
-            <select id="main-object-select" name="object" disabled>
-                <option value="">Выберите объект</option>
-            </select>
-            <button type="button" class="add-button" onclick="openModal('add-object-modal')">+ Добавить объект</button>
-        </div>
+    <label for="main-inventory-select">Инвентарь:</label>
+    <select id="main-inventory-select" name="inventory">
+        <option value="">Выберите инвентарь</option>
+        {% for inventory in inventories %}
+            <option value="{{ inventory.id_i }}" {% if inventory.id_i == selected_inventory_id %}selected{% endif %}>
+                {{ inventory.название }}
+            </option>
+        {% endfor %}
+    </select>
+    <button type="button" class="add-button" onclick="openModal('add-inventory-modal')">+</button>
+    <button type="button" class="edit-button" onclick="openEditInventoryModal()">✎</button>
+    <button type="button" class="delete-button" onclick="confirmDeleteInventory()">×</button>
+</div>
 
+<div class="form-group">
+    <label for="main-group-select">Группа:</label>
+    <select id="main-group-select" name="group" disabled>
+        <option value="">Выберите группу</option>
+    </select>
+    <button type="button" class="add-button" onclick="openModal('add-group-modal')">+</button>
+    <button type="button" class="edit-button" onclick="openEditGroupModal()">✎</button>
+    <button type="button" class="delete-button" onclick="confirmDeleteGroup()">×</button>
+</div>
+
+<div class="form-group">
+    <label for="main-object-select">Объект:</label>
+    <select id="main-object-select" name="object" disabled>
+        <option value="">Выберите объект</option>
+    </select>
+    <button type="button" class="add-button" onclick="openModal('add-object-modal')">+</button>
+    <button type="button" class="edit-button" onclick="openEditObjectModal()">✎</button>
+    <button type="button" class="delete-button" onclick="confirmDeleteObject()">×</button>
+</div>
+
+<div id="edit-inventory-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Редактирование инвентаря</h2>
+            <span class="close" onclick="closeModal('edit-inventory-modal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="edit-inventory-form" method="POST" action="{% url 'inventory_edit' 0 %}">
+                {% csrf_token %}
+                <label for="edit-inventory-name">Название:</label>
+                <input type="text" id="edit-inventory-name" name="название" required>
+                <button type="submit">Сохранить</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для редактирования группы -->
+<div id="edit-group-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Редактирование группы</h2>
+            <span class="close" onclick="closeModal('edit-group-modal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="edit-group-form" method="POST" action="{% url 'groups_edit' 0 %}">
+                {% csrf_token %}
+                <label for="edit-group-name">Название:</label>
+                <input type="text" id="edit-group-name" name="название" required>
+                <button type="submit">Сохранить</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Модальное окно для редактирования объекта -->
+<div id="edit-object-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Редактирование объекта</h2>
+            <span class="close" onclick="closeModal('edit-object-modal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form id="edit-object-form" method="POST" action="{% url 'object_edit' 0 %}">
+                {% csrf_token %}
+                <label for="edit-object-name">Название:</label>
+                <input type="text" id="edit-object-name" name="название" required>
+                <button type="submit">Сохранить</button>
+            </form>
+        </div>
+    </div>
+</div>
         <div class="section">
             <h3>Регламенты</h3>
             <table id="regulations-table" border="1">
@@ -174,6 +233,7 @@
             </div>
         </div>
     </div>
+     <script src="{% static 'js/add_object.js' %}"></script>
 <script>
     function openModal(modalId) {
         const modal = document.getElementById(modalId);
@@ -190,6 +250,155 @@
             modal.style.display = 'none';
         } else {
             console.error(`Модальное окно с id="${modalId}" не найдено.`);
+        }
+    }
+    function openEditInventoryModal() {
+    const selectedInventoryId = document.getElementById('main-inventory-select').value;
+    if (!selectedInventoryId) {
+        alert('Выберите инвентарь для редактирования.');
+        return;
+    }
+    const inventoryName = document.querySelector(`#main-inventory-select option[value="${selectedInventoryId}"]`).textContent;
+
+    // Предзаполнение формы
+    document.getElementById('edit-inventory-name').value = inventoryName.trim(); // Используйте trim(), чтобы удалить лишние пробелы
+    document.getElementById('edit-inventory-form').action = `/inventory/edit/${selectedInventoryId}/`;
+    openModal('edit-inventory-modal');
+}
+
+    // Функция для открытия модального окна редактирования группы
+    function openEditGroupModal() {
+        const selectedGroupId = document.getElementById('main-group-select').value;
+        if (!selectedGroupId) {
+            alert('Выберите группу для редактирования.');
+            return;
+        }
+        const groupName = document.querySelector(`#main-group-select option[value="${selectedGroupId}"]`).textContent;
+
+        // Предзаполнение формы
+        document.getElementById('edit-group-name').value = groupName;
+        document.getElementById('edit-group-form').action = `/groups/edit/${selectedGroupId}/`;
+        openModal('edit-group-modal');
+    }
+
+    // Функция для открытия модального окна редактирования объекта
+    function openEditObjectModal() {
+        const selectedObjectId = document.getElementById('main-object-select').value;
+        if (!selectedObjectId) {
+            alert('Выберите объект для редактирования.');
+            return;
+        }
+        const objectName = document.querySelector(`#main-object-select option[value="${selectedObjectId}"]`).textContent;
+
+        // Предзаполнение формы
+        document.getElementById('edit-object-name').value = objectName;
+        document.getElementById('edit-object-form').action = `/object/edit/${selectedObjectId}/`;
+        openModal('edit-object-modal');
+    }
+    function confirmDeleteInventory() {
+        const selectedInventoryId = document.getElementById('main-inventory-select').value;
+        if (!selectedInventoryId) {
+            alert('Выберите инвентарь для удаления.');
+            return;
+        }
+        if (confirm('Вы уверены, что хотите удалить этот инвентарь?')) {
+            fetch(`/inventory/delete/${selectedInventoryId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value,
+                },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка при удалении инвентаря.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert('Инвентарь успешно удален.');
+                    location.reload(); // Обновляем страницу после удаления
+                } else {
+                    alert('Произошла ошибка при удалении инвентаря.');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Не удалось удалить инвентарь.');
+            });
+        }
+    }
+
+    // Функция для удаления группы
+    function confirmDeleteGroup() {
+        const selectedGroupId = document.getElementById('main-group-select').value;
+        if (!selectedGroupId) {
+            alert('Выберите группу для удаления.');
+            return;
+        }
+        if (confirm('Вы уверены, что хотите удалить эту группу?')) {
+            fetch(`/groups/delete/${selectedGroupId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value,
+                },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка при удалении группы.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert('Группа успешно удалена.');
+                    location.reload(); // Обновляем страницу после удаления
+                } else {
+                    alert('Произошла ошибка при удалении группы.');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Не удалось удалить группу.');
+            });
+        }
+    }
+
+    // Функция для удаления объекта
+    function confirmDeleteObject() {
+        const selectedObjectId = document.getElementById('main-object-select').value;
+        if (!selectedObjectId) {
+            alert('Выберите объект для удаления.');
+            return;
+        }
+        if (confirm('Вы уверены, что хотите удалить этот объект?')) {
+            fetch(`/object/delete/${selectedObjectId}/`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': document.querySelector('[name="csrfmiddlewaretoken"]').value,
+                },
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Ошибка при удалении объекта.');
+                }
+                return response.json();
+            })
+            .then(data => {
+                if (data.success) {
+                    alert('Объект успешно удален.');
+                    location.reload(); // Обновляем страницу после удаления
+                } else {
+                    alert('Произошла ошибка при удалении объекта.');
+                }
+            })
+            .catch(error => {
+                console.error('Ошибка:', error);
+                alert('Не удалось удалить объект.');
+            });
         }
     }
 </script>

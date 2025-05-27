@@ -40,6 +40,13 @@ urlpatterns = [
     # path('inventory/edit/<int:pk>/', views.inventory_edit, name='inventory_edit'),
     # path('inventory/delete/<int:pk>/', views.inventory_delete, name='inventory_delete'),
 
+    path('inventory/edit/<int:pk>/', views.inventory_edit, name='inventory_edit'),
+    path('groups/edit/<int:pk>/', views.groups_edit, name='groups_edit'),
+    path('object/edit/<int:pk>/', views.object_edit, name='object_edit'),
+
+    path('inventory/delete/<int:pk>/', views.inventory_delete, name='inventory_delete'),
+    path('groups/delete/<int:pk>/', views.groups_delete, name='groups_delete'),
+    path('object/delete/<int:pk>/', views.object_delete, name='object_delete'),
     # Группы
     path('groups/', views.groups_list, name='groups_list'),
     path('groups/create/', views.groups_create, name='groups_create'),

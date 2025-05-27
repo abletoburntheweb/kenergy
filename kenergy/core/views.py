@@ -7,6 +7,8 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.csrf import csrf_exempt
+
 from .models import Inventory, Groups as GroupsModel, Object, Tests, Standards, Groups
 from .user import (
     UserInventoryForm,
@@ -68,18 +70,28 @@ def inventory_edit(request, pk):
         form = UserInventoryForm(request.POST, instance=inventory)
         if form.is_valid():
             form.save()
-            return redirect('inventory_list')
-    else:
-        form = UserInventoryForm(instance=inventory)
-    return render(request, 'core/inventory_form.html', {'form': form})
+            return JsonResponse({
+                'success': True,
+                'id': form.instance.id_i,
+                'name': form.instance.название
+            })
+        else:
+            return JsonResponse({
+                'success': False,
+                'errors': form.errors
+            }, status=400)
+    return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)
 
+@csrf_exempt
 @login_required
 def inventory_delete(request, pk):
-    inventory = get_object_or_404(Inventory, pk=pk)
-    if request.method == 'POST':
+    try:
+        inventory = Inventory.objects.get(pk=pk)
         inventory.delete()
-        return redirect('inventory_list')
-    return render(request, 'core/inventory_confirm_delete.html', {'inventory': inventory})
+        return JsonResponse({'success': True})
+    except Inventory.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Инвентарь не найден.'}, status=404)
+
 
 @login_required
 def groups_list(request):
@@ -155,13 +167,16 @@ def groups_edit(request, pk):
         form = UserGroupForm(instance=group)
     return render(request, 'core/groups_form.html', {'form': form})
 
+@csrf_exempt
 @login_required
 def groups_delete(request, pk):
-    group = get_object_or_404(GroupsModel, pk=pk)
-    if request.method == 'POST':
+    try:
+        group = Groups.objects.get(pk=pk)
         group.delete()
-        return redirect('groups_list')
-    return render(request, 'core/groups_confirm_delete.html', {'group': group})
+        return JsonResponse({'success': True})
+    except Groups.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Группа не найдена.'}, status=404)
+
 
 @login_required
 def object_list(request):
@@ -199,13 +214,15 @@ def object_edit(request, pk):
         form = UserObjectForm(instance=obj)
     return render(request, 'core/object_form.html', {'form': form})
 
+@csrf_exempt
 @login_required
 def object_delete(request, pk):
-    obj = get_object_or_404(Object, pk=pk)
-    if request.method == 'POST':
+    try:
+        obj = Object.objects.get(pk=pk)
         obj.delete()
-        return redirect('object_list')
-    return render(request, 'core/object_confirm_delete.html', {'object': obj})
+        return JsonResponse({'success': True})
+    except Object.DoesNotExist:
+        return JsonResponse({'success': False, 'message': 'Объект не найден.'}, status=404)
 
 @login_required
 def defects_list(request):

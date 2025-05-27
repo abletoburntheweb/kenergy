@@ -239,7 +239,6 @@ document.addEventListener('DOMContentLoaded', () => {
             event.target.style.display = 'none';
         }
     };
-
 document.querySelectorAll('.add-row-btn').forEach(button => {
     button.addEventListener('click', () => {
         const tableId = button.getAttribute('data-table-id');
