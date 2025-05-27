@@ -1,21 +1,16 @@
-import json
-import sys
-import logging
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AuthenticationForm
-from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import Inventory, Groups as GroupsModel, Object, Tests, Standards
+from .models import Inventory, Groups, Object, Tests, Standards
 from .user import (
     UserInventoryForm,
-    UserGroupForm,
+    UserGroupsForm,
     UserObjectForm,
     UserTestsForm,
     UserStandardsForm,
 )
 
-logger = logging.getLogger(__name__)
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -37,29 +32,25 @@ def admin_panel(request):
     if not request.user.is_superuser:
         return redirect('system_settings')
     return render(request, 'core/admin_panel.html')
+# Список инвентаря
 @login_required
 def inventory_list(request):
     inventories = Inventory.objects.all()
     return render(request, 'core/inventory_list.html', {'inventories': inventories})
 
+# Создание инвентаря
 @login_required
 def inventory_create(request):
     if request.method == 'POST':
         form = UserInventoryForm(request.POST)
         if form.is_valid():
             form.save()
-            return JsonResponse({
-                'success': True,
-                'id': form.instance.id_i,
-                'name': form.instance.название
-            })
-        else:
-            return JsonResponse({
-                'success': False,
-                'errors': form.errors
-            }, status=400)
-    return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)
+            return redirect('inventory_list')
+    else:
+        form = UserInventoryForm()
+    return render(request, 'core/inventory_form.html', {'form': form})
 
+# Редактирование инвентаря
 @login_required
 def inventory_edit(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
@@ -80,37 +71,38 @@ def inventory_delete(request, pk):
         return redirect('inventory_list')
     return render(request, 'core/inventory_confirm_delete.html', {'inventory': inventory})
 
+# Список групп
 @login_required
 def groups_list(request):
-    groups = GroupsModel.objects.all().values('id_g', 'название')
-    return JsonResponse(list(groups), safe=False)
+    groups = Groups.objects.all()
+    return render(request, 'core/groups_list.html', {'groups': groups})
 
 @login_required
 def groups_create(request):
     if request.method == 'POST':
-        form = UserGroupForm(request.POST)
+        form = UserGroupsForm(request.POST)
         if form.is_valid():
             form.save()
             return redirect('groups_list')
     else:
-        form = UserGroupForm()
+        form = UserGroupsForm()
     return render(request, 'core/groups_form.html', {'form': form})
 
 @login_required
 def groups_edit(request, pk):
-    group = get_object_or_404(GroupsModel, pk=pk)
+    group = get_object_or_404(Groups, pk=pk)
     if request.method == 'POST':
-        form = UserGroupForm(request.POST, instance=group)
+        form = UserGroupsForm(request.POST, instance=group)
         if form.is_valid():
             form.save()
             return redirect('groups_list')
     else:
-        form = UserGroupForm(instance=group)
+        form = UserGroupsForm(instance=group)
     return render(request, 'core/groups_form.html', {'form': form})
 
 @login_required
 def groups_delete(request, pk):
-    group = get_object_or_404(GroupsModel, pk=pk)
+    group = get_object_or_404(Groups, pk=pk)
     if request.method == 'POST':
         group.delete()
         return redirect('groups_list')
@@ -126,19 +118,11 @@ def object_create(request):
     if request.method == 'POST':
         form = UserObjectForm(request.POST)
         if form.is_valid():
-            obj = form.save()
-            return JsonResponse({
-                'success': True,
-                'id': obj.id_o,
-                'name': obj.название
-            })
-        else:
-            logger.error(f"Validation errors in UserObjectForm: {form.errors}")
-            return JsonResponse({
-                'success': False,
-                'errors': dict(form.errors)
-            }, status=400)
-    return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)
+            form.save()
+            return redirect('object_list')
+    else:
+        form = UserObjectForm()
+    return render(request, 'core/object_form.html', {'form': form})
 
 @login_required
 def object_edit(request, pk):
@@ -188,6 +172,7 @@ def tests_edit(request, pk):
         form = UserTestsForm(instance=test)
     return render(request, 'core/tests_form.html', {'form': form})
 
+# Удаление теста
 @login_required
 def tests_delete(request, pk):
     test = get_object_or_404(Tests, pk=pk)
@@ -196,11 +181,13 @@ def tests_delete(request, pk):
         return redirect('tests_list')
     return render(request, 'core/tests_confirm_delete.html', {'test': test})
 
+# Список стандартов
 @login_required
 def standards_list(request):
     standards = Standards.objects.all()
     return render(request, 'core/standards_list.html', {'standards': standards})
 
+# Создание стандарта
 @login_required
 def standards_create(request):
     if request.method == 'POST':
@@ -212,6 +199,7 @@ def standards_create(request):
         form = UserStandardsForm()
     return render(request, 'core/standards_form.html', {'form': form})
 
+# Редактирование стандарта
 @login_required
 def standards_edit(request, pk):
     standard = get_object_or_404(Standards, pk=pk)
@@ -224,6 +212,7 @@ def standards_edit(request, pk):
         form = UserStandardsForm(instance=standard)
     return render(request, 'core/standards_form.html', {'form': form})
 
+# Удаление стандарта
 @login_required
 def standards_delete(request, pk):
     standard = get_object_or_404(Standards, pk=pk)
@@ -232,162 +221,144 @@ def standards_delete(request, pk):
         return redirect('standards_list')
     return render(request, 'core/standards_confirm_delete.html', {'standard': standard})
 
-
 @login_required
 def edit_db(request):
+    if not request.user.is_staff:
+        return redirect('system_settings')
+
+    # Получаем все инвентари
     inventories = Inventory.objects.all()
+
+    # Получаем выбранный инвентарь из GET-параметров
     selected_inventory_id = request.GET.get('inventory')
+    print("Selected inventory ID:", selected_inventory_id)  # Отладочный вывод
+
+    # Преобразуем selected_inventory_id в целое число
+    try:
+        selected_inventory_id = int(selected_inventory_id) if selected_inventory_id else None
+    except ValueError:
+        print("Ошибка: Некорректное значение inventory")
+        selected_inventory_id = None
+
+    # Фильтруем группы по выбранному инвентарю
+    groups = []
     if selected_inventory_id:
-        groups = GroupsModel.objects.filter(id_i_id=selected_inventory_id)
-    else:
-        groups = []
-    context = {
+        try:
+            groups = Groups.objects.filter(id_i_id=selected_inventory_id)
+            print("Filtered groups:", groups)  # Отладочный вывод
+        except Exception as e:
+            print("Ошибка при фильтрации групп:", e)  # Отладочный вывод
+            raise
+
+    # Передаем данные в шаблон
+    return render(request, 'core/edit_db.html', {
         'inventories': inventories,
         'groups': groups,
         'selected_inventory_id': selected_inventory_id,
-    }
-    return render(request, 'core/edit_db.html', context)
-
-def get_inventories(request):
-    inventories = Inventory.objects.all().values('id_i', 'название')
-    return JsonResponse(list(inventories), safe=False)
-
-def get_groups(request):
-    inventory_id = request.GET.get('inventory')
-    logger.debug(f"Inventory ID: {inventory_id}")
-    if not inventory_id:
-        return JsonResponse([], safe=False)
-    groups = GroupsModel.objects.filter(id_i=inventory_id).values('id_g', 'название')
-    logger.debug(f"Groups: {list(groups)}")
-    return JsonResponse(list(groups), safe=False)
-def get_objects(request):
-    group_id = request.GET.get('group')
-    objects = Object.objects.filter(id_g=group_id).values('id_o', 'название')
-    return JsonResponse(list(objects), safe=False)
+    })
 @login_required
 def system_settings(request):
     return render(request, 'core/system_settings.html')
 
 @login_required
 def save_object(request):
-    logger.debug("Запрос POST в save_object получен.")
     if request.method == 'POST':
-        inventory_id = request.POST.get('inventory')
         group_id = request.POST.get('group')
+        subgroup_id = request.POST.get('subgroup')
         object_id = request.POST.get('object')
-        standards = request.POST.getlist('standard[]')
-        requirements = request.POST.getlist('requirement[]')
-        tests = request.POST.getlist('test[]')
-        recommendations = request.POST.getlist('recommendation[]')
-        metrics = request.POST.getlist('metric[]')
 
-        if not inventory_id or not group_id:
-            logger.error("Inventory или Group не выбраны.")
-            return JsonResponse({'success': False, 'message': 'Inventory или Group не выбраны.'}, status=400)
+        standards = request.POST.getlist('standard')
+        requirements = request.POST.getlist('requirement')
 
-        try:
-            inventory = Inventory.objects.get(id_i=inventory_id)
-            group = GroupsModel.objects.get(id_g=group_id)
-        except (Inventory.DoesNotExist, GroupsModel.DoesNotExist) as e:
-            logger.error(f"Ошибка при получении Inventory или Group: {e}")
-            return JsonResponse({'success': False, 'message': f'Ошибка при получении Inventory или Group: {e}'}, status=400)
+        tests = request.POST.getlist('test')
+        recommendations = request.POST.getlist('recommendation')
+        metrics = request.POST.getlist('metric')
 
-        if object_id:
-            obj = Object.objects.get(id_o=object_id)
-            obj.id_g = group
-            obj.save()
-        else:
-            obj = Object.objects.create(id_g=group, название="Новый объект")
+        # Создаем объект
+        group = Groups.objects.get(id_g=group_id)
+        obj = Object.objects.create(id_g=group, название="Новый объект")
 
+        # Создаем стандарты
         for standard, requirement in zip(standards, requirements):
-            existing_standard = Standards.objects.filter(id_o=obj, стандарт=standard, требование=requirement).first()
-            if not existing_standard:
-                Standards.objects.create(id_o=obj, стандарт=standard, требование=requirement)
+            Standards.objects.create(id_o=obj, стандарт=standard, требование=requirement)
 
+        # Создаем тесты
         for test, recommendation, metric in zip(tests, recommendations, metrics):
-            existing_test = Tests.objects.filter(id_o=obj, испытание=test, рекомендация=recommendation, метрика=float(metric)).first()
-            if not existing_test:
-                Tests.objects.create(
-                    id_o=obj,
-                    испытание=test,
-                    рекомендация=recommendation,
-                    метрика=float(metric)
-                )
+            Tests.objects.create(
+                id_o=obj,
+                испытание=test,
+                рекомендация=recommendation,
+                метрика=float(metric)
+            )
 
-        logger.debug("Данные успешно сохранены.")
-        return JsonResponse({'success': True, 'message': 'Данные успешно сохранены.'})
+        return redirect('edit_db')
+    return redirect('edit_db')
 
-    logger.error("Неверный метод запроса.")
-    return JsonResponse({'success': False, 'message': 'Неверный метод запроса.'}, status=405)
-
-@login_required
-def save_new_row(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            object_id = data.get('object_id')
-            table = data.get('table')
-            row_data = data.get('data')
-
-            obj = Object.objects.get(id_o=object_id)
-
-            if table == 'regulations-table':
-                standard = Standards.objects.create(
-                    id_o=obj,
-                    стандарт=row_data.get('standard'),
-                    требование=row_data.get('requirement')
-                )
-                return JsonResponse({'success': True, 'id': standard.id_s})
-            elif table == 'defects-table':
-                test = Tests.objects.create(
-                    id_o=obj,
-                    испытание=row_data.get('test'),
-                    рекомендация=row_data.get('recommendation'),
-                    метрика=row_data.get('metric')
-                )
-                return JsonResponse({'success': True, 'id': test.id_def})
-
-        except Exception as e:
-            logger.error(f"Ошибка при сохранении новой строки: {e}")
-            return JsonResponse({'success': False, 'message': 'Произошла ошибка при сохранении данных.'}, status=500)
-
-    return JsonResponse({'success': False, 'message': 'Неверный метод запроса.'}, status=405)
 
 @login_required
 def regulations(request):
     inventories = Inventory.objects.all()
-
-    selected_inventory_id = request.GET.get('inventory')
-    selected_group_id = request.GET.get('group')
+    groups = []
     objects = []
     standards = []
+    unmet_requirements = []
+    all_met = False
+    show_requirements = False
 
-    if selected_inventory_id:
-        groups = GroupsModel.objects.filter(id_i=selected_inventory_id)
+    selected_inventory = request.POST.get('inventory') or request.GET.get('inventory')
+    selected_group = request.POST.get('group') or request.GET.get('group')
+    selected_object = request.POST.get('object') or request.GET.get('object')
+
+    if selected_inventory:
+        groups = Groups.objects.filter(id_i=selected_inventory)
+
+    if selected_group:
+        objects = Object.objects.filter(id_g=selected_group)
+
+    # Загружаем стандарты сразу, если объект выбран
+    if selected_object:
+        standards = Standards.objects.filter(id_o=selected_object)
     else:
-        groups = []
+        standards = []  # Если объект не выбран, стандартов нет
 
-    if selected_group_id:
-        objects = Object.objects.filter(id_g=selected_group_id)
-        standards = Standards.objects.filter(id_o__in=objects)
+    # Проверяем, была ли нажата кнопка "Продолжить"
+    if request.method == 'POST' and 'continue_button' in request.POST:
+        show_requirements = True
+
+        # Получаем ID выбранных стандартов (может быть пустым)
+        completed_ids = request.POST.getlist('standard_checkbox')
+
+        # Если объект выбран, продолжаем проверку
+        if selected_object:
+            if not completed_ids:
+                # Если ничего не отмечено → все стандарты считаются невыполненными
+                unmet_requirements = standards
+            else:
+                # Иначе считаем невыполненными те, которых нет среди отмеченных
+                unmet_requirements = [std for std in standards if str(std.id_s) not in completed_ids]
+
+            all_met = len(unmet_requirements) == 0
 
     context = {
         'inventories': inventories,
         'groups': groups,
         'objects': objects,
         'standards': standards,
-        'selected_inventory_id': int(selected_inventory_id) if selected_inventory_id else None,
-        'selected_group_id': int(selected_group_id) if selected_group_id else None,
+        'unmet_requirements': unmet_requirements,
+        'all_met': all_met,
+        'selected_inventory': selected_inventory,
+        'selected_group': selected_group,
+        'selected_object': selected_object,
+        'show_requirements': show_requirements,
     }
 
     return render(request, 'core/regulations.html', context)
-
 @login_required
 def definition(request):
     inventories = Inventory.objects.all()
 
     selected_inventory_id = request.GET.get('inventory')
-    groups = GroupsModel.objects.filter(id_i=selected_inventory_id) if selected_inventory_id else []
+    groups = Groups.objects.filter(id_i=selected_inventory_id) if selected_inventory_id else []
 
     selected_group_id = request.GET.get('group')
     tests = Tests.objects.filter(id_o__id_g=selected_group_id).select_related('id_o') if selected_group_id else []
@@ -416,7 +387,7 @@ def defects(request):
     inventories = Inventory.objects.all()
 
     selected_inventory_id = request.GET.get('inventory')
-    groups = GroupsModel.objects.filter(id_i=selected_inventory_id) if selected_inventory_id else []
+    groups = Groups.objects.filter(id_i=selected_inventory_id) if selected_inventory_id else []
 
     selected_group_id = request.GET.get('group')
     objects = Object.objects.filter(id_g=selected_group_id) if selected_group_id else []
@@ -424,106 +395,36 @@ def defects(request):
     selected_object_id = request.GET.get('object')
     tests = Tests.objects.filter(id_o=selected_object_id).select_related('id_o') if selected_object_id else []
 
-    verdict = None
+    discrepancies = []
+    recommendations = {}
+    show_results = False
+
     if request.method == 'POST':
-        selected_test_ids = request.POST.getlist('test')
-        verdict = "Пригоден" if not selected_test_ids else "Не пригоден"
-        return render(request, 'core/defects.html', {
-            'inventories': inventories,
-            'groups': groups,
-            'objects': objects,
-            'tests': tests,
-            'verdict': verdict,
-            'selected_inventory_id': int(selected_inventory_id) if selected_inventory_id else None,
-            'selected_group_id': int(selected_group_id) if selected_group_id else None,
-            'selected_object_id': int(selected_object_id) if selected_object_id else None,
-        })
+        show_results = True
+
+        for test in tests:
+            metric_key = f'metric_{test.id_def}'
+            entered_value = request.POST.get(metric_key)
+
+            try:
+                entered_value_float = float(entered_value)
+                if abs(entered_value_float - test.метрика) > 1e-9:  # защита от float погрешности
+                    discrepancies.append(test)
+                    recommendations[test.id_def] = test.рекомендация
+            except (ValueError, TypeError):
+                # Если пользователь не ввёл число или оно невалидно
+                discrepancies.append(test)
+                recommendations[test.id_def] = test.рекомендация
 
     return render(request, 'core/defects.html', {
         'inventories': inventories,
         'groups': groups,
         'objects': objects,
         'tests': tests,
-        'verdict': verdict,
+        'show_results': show_results,
+        'discrepancies': discrepancies,
+        'recommendations': recommendations,
         'selected_inventory_id': int(selected_inventory_id) if selected_inventory_id else None,
         'selected_group_id': int(selected_group_id) if selected_group_id else None,
         'selected_object_id': int(selected_object_id) if selected_object_id else None,
     })
-@login_required
-def get_regulations(request):
-    object_id = request.GET.get('object')
-    if not object_id:
-        return JsonResponse([], safe=False)
-    regulations = Standards.objects.filter(id_o=object_id).values('id_s', 'стандарт', 'требование')
-    return JsonResponse(list(regulations), safe=False)
-
-@login_required
-def get_defects(request):
-    object_id = request.GET.get('object')
-    if not object_id:
-        return JsonResponse([], safe=False)
-    defects = Tests.objects.filter(id_o=object_id).values('id_def', 'испытание', 'рекомендация', 'метрика')
-    return JsonResponse(list(defects), safe=False)
-
-@login_required
-def update_row(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            object_id = data.get('object_id')
-            table = data.get('table')
-            row_data = data.get('data')
-
-            row_id = row_data.get('id')
-            if not row_id:
-                return JsonResponse({'success': False, 'message': 'Уникальный идентификатор строки отсутствует.'}, status=400)
-
-            if table == 'regulations-table':
-                standard = row_data.get('standard')
-                requirement = row_data.get('requirement')
-                Standards.objects.filter(id_o=object_id, id_s=row_id).update(
-                    стандарт=standard,
-                    требование=requirement
-                )
-            elif table == 'defects-table':
-                test = row_data.get('test')
-                recommendation = row_data.get('recommendation')
-                metric = row_data.get('metric')
-                Tests.objects.filter(id_o=object_id, id_def=row_id).update(
-                    испытание=test,
-                    рекомендация=recommendation,
-                    метрика=metric
-                )
-
-            return JsonResponse({'success': True, 'message': 'Данные успешно обновлены.'})
-        except Exception as e:
-            logger.error(f"Ошибка при обновлении строки: {e}")
-            return JsonResponse({'success': False, 'message': 'Произошла ошибка при обновлении данных.'}, status=500)
-
-    return JsonResponse({'success': False, 'message': 'Неверный метод запроса.'}, status=405)
-
-@login_required
-def delete_row(request):
-    if request.method == 'POST':
-        try:
-            data = json.loads(request.body)
-            object_id = data.get('object_id')
-            table = data.get('table')
-            row_data = data.get('data')
-
-            if table == 'regulations-table':
-                standard = row_data.get('standard')
-                requirement = row_data.get('requirement')
-                Standards.objects.filter(id_o=object_id, стандарт=standard, требование=requirement).delete()
-            elif table == 'defects-table':
-                test = row_data.get('test')
-                recommendation = row_data.get('recommendation')
-                metric = row_data.get('metric')
-                Tests.objects.filter(id_o=object_id, испытание=test, рекомендация=recommendation, метрика=metric).delete()
-
-            return JsonResponse({'success': True, 'message': 'Данные успешно удалены.'})
-        except Exception as e:
-            logger.error(f"Ошибка при удалении строки: {e}")
-            return JsonResponse({'success': False, 'message': 'Произошла ошибка при удалении данных.'}, status=500)
-
-    return JsonResponse({'success': False, 'message': 'Неверный метод запроса.'}, status=405)
