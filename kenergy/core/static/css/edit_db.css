@@ -1,3 +1,4 @@
+/* core/static/css/edit_db.css */
 /* ---------------------- ОБЩИЕ СТИЛИ ---------------------- */
 
 body {
@@ -181,7 +182,7 @@ table tbody tr:hover {
     background-color: #ffeb3b;
     color: #333;
     border: none;
-    font-size: 16px;
+    font-size: 14px;
     cursor: pointer;
     padding: 8px 12px;
     border-radius: 4px;
@@ -196,12 +197,12 @@ table tbody tr:hover {
     background-color: #28a745;
     color: white;
     border: none;
-    padding: 5px 10px;
-    border-radius: 5px;
-    cursor: pointer;
     font-size: 16px;
-    width: 30px;
-    height: 30px;
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+    margin-right: 5px;
 }
 
 .save-new-row-btn:hover {

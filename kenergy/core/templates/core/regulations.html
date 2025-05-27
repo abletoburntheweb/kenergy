@@ -1,3 +1,4 @@
+<!-- core/templates/core/regulations.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -66,7 +67,6 @@
 
         <a href="{% url 'system_settings' %}" class="btn-back">Назад</a>
 
-        <!-- Таблица стандартов -->
         {% if standards %}
             <div class="table-container">
                 <table>
@@ -99,7 +99,6 @@
         {% endif %}
     </form>
 
-    <!-- Сообщения пользователю -->
     {% if show_requirements %}
         {% if all_met %}
             <div class="success-message">

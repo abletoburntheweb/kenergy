@@ -1,3 +1,4 @@
+<!-- core/templates/core/defects.html -->
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -70,7 +71,6 @@
 
         <a href="{% url 'system_settings' %}" class="btn-back">Назад</a>
 
-        <!-- Контейнер с таблицей и скроллом -->
         {% if tests %}
             <div class="table-container">
                 <table>
@@ -103,7 +103,6 @@
         {% endif %}
     </form>
 
-    <!-- Результаты сравнения -->
     {% if show_results %}
         {% if discrepancies %}
             <div class="unmet-requirements">

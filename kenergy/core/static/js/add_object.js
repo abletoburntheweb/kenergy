@@ -1,3 +1,4 @@
+// core/static/js/add_object.js
 document.addEventListener('DOMContentLoaded', () => {
     const mainInventorySelect = document.getElementById('main-inventory-select');
     const mainGroupSelect = document.getElementById('main-group-select');
@@ -22,7 +23,20 @@ document.addEventListener('DOMContentLoaded', () => {
         selectElement.innerHTML = '<option value="">Выберите</option>';
         selectElement.disabled = true;
     }
-
+    document.getElementById('modal-inventory-select').addEventListener('change', function () {
+    const inventoryId = this.value;
+    const groupSelect = document.getElementById('modal-group-select');
+    clearDropdown(groupSelect);
+    if (inventoryId) {
+        fetch(`/api/groups/?inventory=${inventoryId}`)
+            .then(response => response.json())
+            .then(data => populateDropdown(groupSelect, data))
+            .catch(error => {
+                console.error('Ошибка при получении групп:', error.message);
+                alert('Не удалось загрузить список групп.');
+            });
+    }
+});
     function updateGroups(inventoryId, groupSelect) {
     if (inventoryId) {
         console.log('Запрос групп для инвентаря:', inventoryId);
@@ -100,14 +114,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
     if (mainInventorySelect && mainGroupSelect) {
         mainInventorySelect.addEventListener('change', () => {
-            const inventoryId = mainInventorySelect.value;
-            clearDropdown(mainGroupSelect);
-            clearDropdown(mainObjectSelect);
-            updateUrlParams({ inventory: inventoryId, group: null, object: null });
-            if (inventoryId) {
-                updateGroups(inventoryId, mainGroupSelect);
-            }
-        });
+    const inventoryId = mainInventorySelect.value;
+    clearDropdown(mainGroupSelect);
+    clearDropdown(mainObjectSelect);
+    updateUrlParams({ inventory: inventoryId, group: null, object: null });
+    if (inventoryId) {
+        updateGroups(inventoryId, mainGroupSelect);
+    }
+});
     }
 
     if (mainGroupSelect && mainObjectSelect) {
@@ -144,51 +158,52 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
         form.addEventListener('submit', (event) => {
-            event.preventDefault();
-            const formData = new FormData(form);
-            const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]');
-            if (!csrfToken) {
-                console.error('CSRF-токен не найден.');
-                return;
-            }
-            fetch(form.action, {
-                method: 'POST',
-                body: formData,
-                headers: {
-                    'X-CSRFToken': csrfToken.value,
-                },
-            })
-            .then(response => {
-                if (!response.ok) {
-                    return response.json().then(errors => {
-                        throw new Error(JSON.stringify(errors));
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                if (data.success) {
-                    closeModal(modalSelector.replace('#', ''));
-                    const selectElement = document.getElementById(selectId);
-                    if (selectElement) {
-                        const newOption = document.createElement('option');
-                        newOption.value = data.id;
-                        newOption.textContent = data.name;
-                        selectElement.appendChild(newOption);
-                        selectElement.value = data.id;
-                    }
-                    if (typeof callback === 'function') {
-                        callback();
-                    }
-                } else {
-                    alert('Произошла ошибка при добавлении:\n' + JSON.stringify(data.errors));
-                }
-            })
-            .catch(error => {
-                console.error('Ошибка при добавлении:', error.message);
-                alert('Произошла неожиданная ошибка при сохранении данных.');
+    event.preventDefault();
+    const formData = new FormData(form);
+    const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]');
+    if (!csrfToken) {
+        console.error('CSRF-токен не найден.');
+        return;
+    }
+    fetch(form.action, {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': csrfToken.value,
+        },
+    })
+    .then(response => {
+        if (!response.ok) {
+            return response.json().then(errors => {
+                throw new Error(JSON.stringify(errors));
             });
-        });
+        }
+        return response.json();
+    })
+    .then(data => {
+    console.log('Ответ сервера:', data);
+    if (data.success) {
+        closeModal(modalSelector.replace('#', ''));
+        const selectElement = document.getElementById(selectId);
+        if (selectElement) {
+            const newOption = document.createElement('option');
+            newOption.value = data.id_g;
+            newOption.textContent = data.название || 'Неизвестная группа';
+            selectElement.appendChild(newOption);
+            selectElement.value = data.id_g;
+        }
+        if (typeof callback === 'function') {
+            callback();
+        }
+    } else {
+        alert('Произошла ошибка при добавлении: ' + JSON.stringify(data.errors));
+    }
+})
+    .catch(error => {
+        console.error('Ошибка при добавлении:', error.message);
+        alert('Произошла неожиданная ошибка при сохранении данных.');
+    });
+});
     }
 
     handleModalFormSubmit('#add-inventory-modal', 'main-inventory-select', () => {
@@ -242,7 +257,7 @@ document.querySelectorAll('.add-row-btn').forEach(button => {
             `;
         } else if (tableId === 'defects-table') {
             newRow.innerHTML = `
-                <td><input type="text" name="test[]" placeholder="Испытания"></td>
+                <td><input type="text" name="defect[]" placeholder="Испытания"></td>
                 <td><input type="text" name="recommendation[]" placeholder="Рекомендуемые действия"></td>
                 <td><input type="number" name="metric[]" placeholder="Метрика" min="0"></td>
                 <td>
@@ -268,7 +283,7 @@ document.querySelectorAll('.add-row-btn').forEach(button => {
                 data.standard = cells[0].querySelector('input').value.trim();
                 data.requirement = cells[1].querySelector('input').value.trim();
             } else if (tableId === 'defects-table') {
-                data.test = cells[0].querySelector('input').value.trim();
+                data.defect = cells[0].querySelector('input').value.trim();
                 data.recommendation = cells[1].querySelector('input').value.trim();
                 data.metric = parseFloat(cells[2].querySelector('input').value.trim());
             }
@@ -292,7 +307,7 @@ document.querySelectorAll('.add-row-btn').forEach(button => {
             .then(result => {
                 if (result.success) {
                     newRow.dataset.id = result.id;
-                    cells[0].textContent = data.standard || data.test || '—';
+                    cells[0].textContent = data.standard || data.defect || '—';
                     cells[1].textContent = data.requirement || data.recommendation || '—';
                     if (tableId === 'defects-table') {
                         cells[2].textContent = data.metric || '—';
@@ -446,7 +461,7 @@ document.addEventListener('click', (event) => {
                             if (index === 0) data.standard = cell.textContent;
                             if (index === 1) data.requirement = cell.textContent;
                         } else if (tableId === 'defects-table') {
-                            if (index === 0) data.test = cell.textContent;
+                            if (index === 0) data.defect = cell.textContent;
                             if (index === 1) data.recommendation = cell.textContent;
                         }
                     }
@@ -467,7 +482,7 @@ document.addEventListener('click', (event) => {
             data.standard = cells[0].textContent.trim();
             data.requirement = cells[1].textContent.trim();
         } else if (tableId === 'defects-table') {
-            data.test = cells[0].textContent.trim();
+            data.defect = cells[0].textContent.trim();
             data.recommendation = cells[1].textContent.trim();
             data.metric = parseFloat(cells[2].textContent.trim());
         }
@@ -533,7 +548,7 @@ function collectFormData() {
         const cells = row.cells;
         return {
             id_def: row.dataset.id,
-            test: cells[0].textContent.trim(),
+            defect: cells[0].textContent.trim(),
             recommendation: cells[1].textContent.trim(),
             metric: parseFloat(cells[2].textContent.trim()),
         };
@@ -544,7 +559,7 @@ function collectFormData() {
         group,
         object,
         standards: regulations,
-        tests: defects,
+        defects: defects,
     };
 }
 function saveRowChanges(row, tableId) {
@@ -560,7 +575,7 @@ function saveRowChanges(row, tableId) {
         data.standard = cells[0].textContent.trim();
         data.requirement = cells[1].textContent.trim();
     } else if (tableId === 'defects-table') {
-        data.test = cells[0].textContent.trim();
+        data.defect = cells[0].textContent.trim();
         data.recommendation = cells[1].textContent.trim();
         data.metric = parseFloat(cells[2].textContent.trim());
     }

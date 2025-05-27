@@ -1,10 +1,11 @@
+<!-- core/templates/core/edit_db.html -->
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <title>Добавление объекта</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/edit_db.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'css/edit_db.css' %}?v=1">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js "></script>
     <script src="{% static 'js/add_object.js' %}"></script>
 </head>
@@ -73,7 +74,7 @@
         </div>
 
         <div class="section">
-            <h3>Дефекты</h3>
+            <h3>Тесты</h3>
             <table id="defects-table" border="1">
                 <thead>
                     <tr>
@@ -123,28 +124,28 @@
     </div>
 
     <div id="add-group-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2 class="modal-title">Добавить группу</h2>
-                <span class="close" onclick="closeModal('add-group-modal')">&times;</span>
-            </div>
-            <div class="modal-body">
-                <form method="POST" action="{% url 'groups_create' %}">
-                    {% csrf_token %}
-                    <label for="modal-group-inventory">Инвентарь:</label>
-                    <select id="modal-group-inventory" name="id_i" required>
-                        <option value="">Выберите инвентарь</option>
-                        {% for inventory in inventories %}
-                            <option value="{{ inventory.id_i }}">{{ inventory.название }}</option>
-                        {% endfor %}
-                    </select>
-                    <label for="modal-group-name">Название:</label>
-                    <input type="text" id="modal-group-name" name="название" required>
-                    <button type="submit">Сохранить</button>
-                </form>
-            </div>
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 class="modal-title">Добавить группу</h2>
+            <span class="close" onclick="closeModal('add-group-modal')">&times;</span>
+        </div>
+        <div class="modal-body">
+            <form method="POST" action="{% url 'groups_create' %}">
+    {% csrf_token %}
+    <label for="modal-group-inventory">Инвентарь:</label>
+    <select id="modal-group-inventory" name="inventory_id" required>
+        <option value="">Выберите инвентарь</option>
+        {% for inventory in inventories %}
+            <option value="{{ inventory.id_i }}">{{ inventory.название }}</option>
+        {% endfor %}
+    </select>
+    <label for="modal-group-name">Название:</label>
+    <input type="text" id="modal-group-name" name="name" required>
+    <button type="submit">Сохранить</button>
+</form>
         </div>
     </div>
+</div>
 
     <div id="add-object-modal" class="modal">
         <div class="modal-content">
