@@ -64,7 +64,7 @@
             </select>
         </div>
 
-        <button type="button" onclick="location.href='{% url 'system_settings' %}'" class="btn">Назад</button>
+        <a href="{% url 'system_settings' %}" class="btn-back">Назад</a>
 
         <!-- Таблица стандартов -->
         {% if standards %}
