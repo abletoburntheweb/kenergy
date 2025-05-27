@@ -117,6 +117,12 @@ select:focus {
 .btn:hover {
     background-color: #5a7de2;
 }
+.btn-back {
+    color: #6e8efb;
+    text-decoration: none;
+    font-size: 14px;
+    transition: color 0.3s ease;
+}
 
 .tables-container {
     display: flex;
