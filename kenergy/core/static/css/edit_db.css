@@ -1,4 +1,3 @@
-/* core/static/css/edit_db.css */
 /* ---------------------- ОБЩИЕ СТИЛИ ---------------------- */
 
 body {
@@ -99,6 +98,7 @@ h2 {
 .add-button:hover {
     background-color: #5a7de2;
 }
+
 .edit-button {
     background-color: #ffeb3b;
     color: #333;
@@ -130,6 +130,7 @@ h2 {
 .delete-button:hover {
     background-color: #cc0000;
 }
+
 .section {
     margin-top: 20px;
 }
@@ -223,6 +224,7 @@ table tbody tr:hover {
 .edit-row-btn:hover {
     background-color: #fdd835;
 }
+
 .save-new-row-btn {
     background-color: #28a745;
     color: white;
@@ -238,6 +240,7 @@ table tbody tr:hover {
 .save-new-row-btn:hover {
     background-color: #218838;
 }
+
 table td:last-child {
     text-align: center;
     white-space: nowrap;
@@ -371,4 +374,81 @@ table td:last-child {
 .modal-body button:hover {
     background-color: #0056b3;
 }
+/* ---------------------- МОБИЛЬНЫЕ СТИЛИ ---------------------- */
 
+@media (max-width: 768px) {
+    body {
+        height: auto;
+        padding: 0;
+    }
+
+    .header {
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px;
+    }
+
+    .welcome-message {
+        margin-right: 10px;
+    }
+
+    .logout-button a {
+        font-size: 14px;
+        padding: 5px 10px;
+    }
+
+    .form-container {
+        width: 75%;
+        padding: 20px;
+        max-height: none;
+    }
+
+    h2 {
+        font-size: 20px;
+    }
+
+    .form-group {
+        flex-direction: column;
+    }
+
+    .form-group label {
+        margin-bottom: 5px;
+    }
+
+    .form-group select {
+        width: 100%;
+        margin-right: 0;
+    }
+
+    .form-group .button-group {
+        display: flex;
+        justify-content: space-between;
+        width: 100%;
+        margin-top: 10px;
+    }
+
+    .form-group .button-group button {
+        flex: 1;
+        margin: 0 5px;
+        padding: 5px 10px;
+    }
+
+    table {
+        font-size: 12px;
+    }
+
+    table th, table td {
+        padding: 8px;
+    }
+
+    .modal-content {
+        width: 70%;
+        padding: 15px;
+    }
+
+    .modal-body input[type="text"], .modal-body select {
+        font-size: 14px;
+                width: 95%;
+    }
+}

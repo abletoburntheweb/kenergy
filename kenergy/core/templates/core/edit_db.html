@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>Добавление объекта</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/edit_db.css' %}?v=1">
+    <link rel="stylesheet" href="{% static 'css/edit_db.css' %}?v=3">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js "></script>
 </head>
 <body>
@@ -29,9 +29,11 @@
             </option>
         {% endfor %}
     </select>
-    <button type="button" class="add-button" onclick="openModal('add-inventory-modal')">+</button>
-    <button type="button" class="edit-button" onclick="openEditInventoryModal()">✎</button>
-    <button type="button" class="delete-button" onclick="confirmDeleteInventory()">×</button>
+    <div class="button-group">
+        <button type="button" class="add-button" onclick="openModal('add-inventory-modal')">+</button>
+        <button type="button" class="edit-button" onclick="openEditInventoryModal()">✎</button>
+        <button type="button" class="delete-button" onclick="confirmDeleteInventory()">×</button>
+    </div>
 </div>
 
 <div class="form-group">
@@ -39,9 +41,11 @@
     <select id="main-group-select" name="group" disabled>
         <option value="">Выберите группу</option>
     </select>
+     <div class="button-group">
     <button type="button" class="add-button" onclick="openModal('add-group-modal')">+</button>
     <button type="button" class="edit-button" onclick="openEditGroupModal()">✎</button>
     <button type="button" class="delete-button" onclick="confirmDeleteGroup()">×</button>
+     </div>
 </div>
 
 <div class="form-group">
@@ -49,9 +53,11 @@
     <select id="main-object-select" name="object" disabled>
         <option value="">Выберите объект</option>
     </select>
+     <div class="button-group">
     <button type="button" class="add-button" onclick="openModal('add-object-modal')">+</button>
     <button type="button" class="edit-button" onclick="openEditObjectModal()">✎</button>
     <button type="button" class="delete-button" onclick="confirmDeleteObject()">×</button>
+     </div>
 </div>
 
 <div id="edit-inventory-modal" class="modal">
@@ -161,7 +167,7 @@
         </div>
 
         <button type="submit" class="save-button">Сохранить</button>
-        <a href="{% url 'system_settings' %}" class="back-link">Назад</a>
+        <a href="{% url 'admin_panel' %}" class="back-link">Назад</a>
     </div>
 
     <!-- Модальные окна -->
