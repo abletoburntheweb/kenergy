@@ -72,15 +72,18 @@ def inventory_edit(request, pk):
             form.save()
             return JsonResponse({
                 'success': True,
-                'id': form.instance.id_i,
-                'name': form.instance.название
+                'id': inventory.id_i,
+                'name': inventory.название
             })
         else:
+            logger.error(f"Validation errors in UserInventoryForm: {form.errors}")
             return JsonResponse({
                 'success': False,
-                'errors': form.errors
+                'errors': dict(form.errors)
             }, status=400)
-    return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)
+    else:
+        form = UserInventoryForm(instance=inventory)
+    return render(request, 'core/inventory_edit.html', {'form': form})
 
 @csrf_exempt
 @login_required
@@ -106,22 +109,16 @@ def groups_list(request):
     return JsonResponse([], safe=False)
 
 
-@login_required
 def groups_create(request):
     if request.method == 'POST':
         inventory_id = request.POST.get('inventory_id')
         name = request.POST.get('name')
         logger.debug(f"Received POST data: inventory_id={inventory_id}, name={name}")
 
-        if not inventory_id or not name:
-            logger.error("Inventory или имя группы не указаны.")
-            return JsonResponse(
-                {'success': False, 'message': 'Inventory или имя группы не указаны.'},
-                status=400
-            )
-
+        # Добавьте логирование для каждого шага
         try:
             inventory = Inventory.objects.get(id_i=inventory_id)
+            logger.info(f"Инвентарь найден: id_i={inventory_id}")
         except Inventory.DoesNotExist:
             logger.error(f"Inventory с id_i={inventory_id} не найден.")
             return JsonResponse(
@@ -154,6 +151,9 @@ def groups_create(request):
                 {'success': False, 'message': f'Ошибка при создании группы: {e}'},
                 status=500
             )
+    else:
+        logger.error("Неверный метод запроса.")
+        return JsonResponse({'success': False, 'message': 'Неверный метод запроса.'}, status=405)
 
 @login_required
 def groups_edit(request, pk):

@@ -4,10 +4,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const mainGroupSelect = document.getElementById('main-group-select');
     const mainObjectSelect = document.getElementById('main-object-select');
 
-    if (!mainInventorySelect) console.error('Элемент с id="main-inventory-select" не найден.');
-    if (!mainGroupSelect) console.error('Элемент с id="main-group-select" не найден.');
-    if (!mainObjectSelect) console.error('Элемент с id="main-object-select" не найден.');
-
     function populateDropdown(selectElement, data) {
         selectElement.innerHTML = '<option value="">Выберите</option>';
         data.forEach(item => {
@@ -39,18 +35,15 @@ document.addEventListener('DOMContentLoaded', () => {
 });
     function updateGroups(inventoryId, groupSelect) {
     if (inventoryId) {
-        console.log('Запрос групп для инвентаря:', inventoryId);
         fetch(`/api/groups/?inventory=${inventoryId}`)
             .then(response => {
                 if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
                 return response.json();
             })
             .then(data => {
-                console.log('Полученные группы:', data);
                 populateDropdown(groupSelect, data);
             })
             .catch(error => {
-                console.error('Ошибка при получении групп:', error.message);
                 alert('Не удалось загрузить список групп.');
             });
     } else {
@@ -66,11 +59,9 @@ document.addEventListener('DOMContentLoaded', () => {
                     return response.json();
                 })
                 .then(data => {
-                    console.log('Полученные объекты:', data);
                     populateDropdown(objectSelect, data);
                 })
                 .catch(error => {
-                    console.error('Ошибка при получении объектов:', error.message);
                     alert('Не удалось загрузить список объектов.');
                 });
         } else {
@@ -150,61 +141,61 @@ document.addEventListener('DOMContentLoaded', () => {
 
     initializeFromUrl();
 
-    function handleModalFormSubmit(modalSelector, selectId, callback) {
-        const modal = document.querySelector(modalSelector);
-        const form = modal.querySelector('form');
-        if (!modal || !form) {
-            console.error(`Модальное окно или форма с селектором "${modalSelector}" не найдены.`);
-            return;
-        }
-        form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const formData = new FormData(form);
-    const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]');
-    if (!csrfToken) {
-        console.error('CSRF-токен не найден.');
+   function handleModalFormSubmit(modalSelector, selectId, callback) {
+    const modal = document.querySelector(modalSelector);
+    const form = modal.querySelector('form');
+    if (!modal || !form) {
+        console.error(`Модальное окно или форма с селектором "${modalSelector}" не найдены.`);
         return;
     }
-    fetch(form.action, {
-        method: 'POST',
-        body: formData,
-        headers: {
-            'X-CSRFToken': csrfToken.value,
-        },
-    })
-    .then(response => {
-        if (!response.ok) {
-            return response.json().then(errors => {
-                throw new Error(JSON.stringify(errors));
-            });
+    form.addEventListener('submit', (event) => {
+        event.preventDefault(); // Предотвращаем стандартное поведение submit
+        const formData = new FormData(form);
+        const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]');
+        if (!csrfToken) {
+            console.error('CSRF-токен не найден.');
+            return;
         }
-        return response.json();
-    })
-    .then(data => {
-    console.log('Ответ сервера:', data);
-    if (data.success) {
-        closeModal(modalSelector.replace('#', ''));
-        const selectElement = document.getElementById(selectId);
-        if (selectElement) {
-            const newOption = document.createElement('option');
-            newOption.value = data.id_g;
-            newOption.textContent = data.название || 'Неизвестная группа';
-            selectElement.appendChild(newOption);
-            selectElement.value = data.id_g;
-        }
-        if (typeof callback === 'function') {
-            callback();
-        }
-    } else {
-        alert('Произошла ошибка при добавлении: ' + JSON.stringify(data.errors));
-    }
-})
-    .catch(error => {
-        console.error('Ошибка при добавлении:', error.message);
-        alert('Произошла неожиданная ошибка при сохранении данных.');
+        fetch(form.action, {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': csrfToken.value,
+            },
+        })
+        .then(response => {
+            if (!response.ok) {
+                return response.json().then(errors => {
+                    throw new Error(JSON.stringify(errors));
+                });
+            }
+            return response.json();
+        })
+        .then(data => {
+            console.log('Ответ сервера:', data);
+            if (data.success) {
+                closeModal(modalSelector.replace('#', '')); // Закрываем модальное окно
+                const selectElement = document.getElementById(selectId);
+                if (selectElement) {
+                    const newOption = document.createElement('option');
+                    newOption.value = data.id; // Используйте правильный идентификатор
+                    newOption.textContent = data.name || 'Неизвестный инвентарь';
+                    selectElement.appendChild(newOption);
+                    selectElement.value = data.id; // Устанавливаем значение выбранного элемента
+                }
+                if (typeof callback === 'function') {
+                    callback();
+                }
+            } else {
+                alert('Произошла ошибка при сохранении данных.');
+            }
+        })
+        .catch(error => {
+            console.error('Ошибка при сохранении:', error.message);
+            alert('Произошла неожиданная ошибка при сохранении данных.');
+        });
     });
-});
-    }
+}
 
     handleModalFormSubmit('#add-inventory-modal', 'main-inventory-select', () => {
         updateGroups(mainInventorySelect.value, mainGroupSelect);
@@ -215,6 +206,7 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     handleModalFormSubmit('#add-object-modal', 'main-object-select');
+
 
     function openModal(modalId) {
         const modal = document.getElementById(modalId);
@@ -239,6 +231,7 @@ document.addEventListener('DOMContentLoaded', () => {
             event.target.style.display = 'none';
         }
     };
+
 document.querySelectorAll('.add-row-btn').forEach(button => {
     button.addEventListener('click', () => {
         const tableId = button.getAttribute('data-table-id');

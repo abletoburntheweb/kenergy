@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <title>Добавление объекта</title>
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/edit_db.css' %}?v=3">
+    <link rel="stylesheet" href="{% static 'css/edit_db.css' %}?v=7">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js "></script>
 </head>
 <body>
@@ -39,8 +39,8 @@
 <div class="form-group">
     <label for="main-group-select">Группа:</label>
     <select id="main-group-select" name="group" disabled>
-        <option value="">Выберите группу</option>
-    </select>
+    <option value="">Выберите группу</option>
+</select>
      <div class="button-group">
     <button type="button" class="add-button" onclick="openModal('add-group-modal')">+</button>
     <button type="button" class="edit-button" onclick="openEditGroupModal()">✎</button>
@@ -77,7 +77,6 @@
     </div>
 </div>
 
-<!-- Модальное окно для редактирования группы -->
 <div id="edit-group-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -95,7 +94,6 @@
     </div>
 </div>
 
-<!-- Модальное окно для редактирования объекта -->
 <div id="edit-object-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -170,7 +168,6 @@
         <a href="{% url 'admin_panel' %}" class="back-link">Назад</a>
     </div>
 
-    <!-- Модальные окна -->
     <div id="add-inventory-modal" class="modal">
         <div class="modal-content">
             <div class="modal-header">
@@ -266,13 +263,11 @@
     }
     const inventoryName = document.querySelector(`#main-inventory-select option[value="${selectedInventoryId}"]`).textContent;
 
-    // Предзаполнение формы
-    document.getElementById('edit-inventory-name').value = inventoryName.trim(); // Используйте trim(), чтобы удалить лишние пробелы
+    document.getElementById('edit-inventory-name').value = inventoryName.trim();
     document.getElementById('edit-inventory-form').action = `/inventory/edit/${selectedInventoryId}/`;
     openModal('edit-inventory-modal');
 }
 
-    // Функция для открытия модального окна редактирования группы
     function openEditGroupModal() {
         const selectedGroupId = document.getElementById('main-group-select').value;
         if (!selectedGroupId) {
@@ -281,13 +276,11 @@
         }
         const groupName = document.querySelector(`#main-group-select option[value="${selectedGroupId}"]`).textContent;
 
-        // Предзаполнение формы
         document.getElementById('edit-group-name').value = groupName;
         document.getElementById('edit-group-form').action = `/groups/edit/${selectedGroupId}/`;
         openModal('edit-group-modal');
     }
 
-    // Функция для открытия модального окна редактирования объекта
     function openEditObjectModal() {
         const selectedObjectId = document.getElementById('main-object-select').value;
         if (!selectedObjectId) {
@@ -296,7 +289,6 @@
         }
         const objectName = document.querySelector(`#main-object-select option[value="${selectedObjectId}"]`).textContent;
 
-        // Предзаполнение формы
         document.getElementById('edit-object-name').value = objectName;
         document.getElementById('edit-object-form').action = `/object/edit/${selectedObjectId}/`;
         openModal('edit-object-modal');
@@ -336,7 +328,6 @@
         }
     }
 
-    // Функция для удаления группы
     function confirmDeleteGroup() {
         const selectedGroupId = document.getElementById('main-group-select').value;
         if (!selectedGroupId) {
@@ -372,7 +363,6 @@
         }
     }
 
-    // Функция для удаления объекта
     function confirmDeleteObject() {
         const selectedObjectId = document.getElementById('main-object-select').value;
         if (!selectedObjectId) {
@@ -396,7 +386,7 @@
             .then(data => {
                 if (data.success) {
                     alert('Объект успешно удален.');
-                    location.reload(); // Обновляем страницу после удаления
+                    location.reload();
                 } else {
                     alert('Произошла ошибка при удалении объекта.');
                 }
