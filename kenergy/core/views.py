@@ -157,12 +157,22 @@ def groups_create(request):
 
 @login_required
 def groups_edit(request, pk):
-    group = get_object_or_404(GroupsModel, pk=pk)
+    group = get_object_or_404(Groups, pk=pk)  # Убедитесь, что используется правильная модель
     if request.method == 'POST':
         form = UserGroupForm(request.POST, instance=group)
         if form.is_valid():
             form.save()
-            return redirect('groups_list')
+            return JsonResponse({
+                'success': True,
+                'id': group.id_g,
+                'name': group.название  # Используйте поле "название" вместо "name"
+            })
+        else:
+            logger.error(f"Validation errors in UserGroupForm: {form.errors}")
+            return JsonResponse({
+                'success': False,
+                'errors': dict(form.errors)
+            }, status=400)
     else:
         form = UserGroupForm(instance=group)
     return render(request, 'core/groups_form.html', {'form': form})
@@ -209,7 +219,17 @@ def object_edit(request, pk):
         form = UserObjectForm(request.POST, instance=obj)
         if form.is_valid():
             form.save()
-            return redirect('object_list')
+            return JsonResponse({
+                'success': True,
+                'id': obj.id_o,
+                'name': obj.название
+            })
+        else:
+            logger.error(f"Validation errors in UserObjectForm: {form.errors}")
+            return JsonResponse({
+                'success': False,
+                'errors': dict(form.errors)
+            }, status=400)
     else:
         form = UserObjectForm(instance=obj)
     return render(request, 'core/object_form.html', {'form': form})

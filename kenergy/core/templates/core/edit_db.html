@@ -77,6 +77,7 @@
     </div>
 </div>
 
+<!-- Редактирование группы -->
 <div id="edit-group-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -85,15 +86,17 @@
         </div>
         <div class="modal-body">
             <form id="edit-group-form" method="POST" action="{% url 'groups_edit' 0 %}">
-                {% csrf_token %}
-                <label for="edit-group-name">Название:</label>
-                <input type="text" id="edit-group-name" name="название" required>
-                <button type="submit">Сохранить</button>
-            </form>
+    {% csrf_token %}
+    <input type="hidden" id="edit-group-inventory-id" name="id_i" value="">
+    <label for="edit-group-name">Название:</label>
+    <input type="text" id="edit-group-name" name="название" required>
+    <button type="submit">Сохранить</button>
+</form>
         </div>
     </div>
 </div>
 
+<!-- Редактирование объекта -->
 <div id="edit-object-modal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -102,11 +105,12 @@
         </div>
         <div class="modal-body">
             <form id="edit-object-form" method="POST" action="{% url 'object_edit' 0 %}">
-                {% csrf_token %}
-                <label for="edit-object-name">Название:</label>
-                <input type="text" id="edit-object-name" name="название" required>
-                <button type="submit">Сохранить</button>
-            </form>
+    {% csrf_token %}
+    <input type="hidden" id="edit-object-group-id" name="id_g" value="">
+    <label for="edit-object-name">Название:</label>
+    <input type="text" id="edit-object-name" name="название" required>
+    <button type="submit">Сохранить</button>
+</form>
         </div>
     </div>
 </div>
@@ -269,30 +273,34 @@
 }
 
     function openEditGroupModal() {
-        const selectedGroupId = document.getElementById('main-group-select').value;
-        if (!selectedGroupId) {
-            alert('Выберите группу для редактирования.');
-            return;
-        }
-        const groupName = document.querySelector(`#main-group-select option[value="${selectedGroupId}"]`).textContent;
-
-        document.getElementById('edit-group-name').value = groupName;
-        document.getElementById('edit-group-form').action = `/groups/edit/${selectedGroupId}/`;
-        openModal('edit-group-modal');
+    const selectedGroupId = document.getElementById('main-group-select').value;
+    if (!selectedGroupId) {
+        alert('Выберите группу для редактирования.');
+        return;
     }
+    const groupName = document.querySelector(`#main-group-select option[value="${selectedGroupId}"]`).textContent.trim();
+    const inventoryId = document.getElementById('main-inventory-select').value;
+
+    document.getElementById('edit-group-name').value = groupName;
+    document.getElementById('edit-group-inventory-id').value = inventoryId;
+    document.getElementById('edit-group-form').action = `/groups/edit/${selectedGroupId}/`;
+    openModal('edit-group-modal');
+}
 
     function openEditObjectModal() {
-        const selectedObjectId = document.getElementById('main-object-select').value;
-        if (!selectedObjectId) {
-            alert('Выберите объект для редактирования.');
-            return;
-        }
-        const objectName = document.querySelector(`#main-object-select option[value="${selectedObjectId}"]`).textContent;
-
-        document.getElementById('edit-object-name').value = objectName;
-        document.getElementById('edit-object-form').action = `/object/edit/${selectedObjectId}/`;
-        openModal('edit-object-modal');
+    const selectedObjectId = document.getElementById('main-object-select').value;
+    if (!selectedObjectId) {
+        alert('Выберите объект для редактирования.');
+        return;
     }
+    const objectName = document.querySelector(`#main-object-select option[value="${selectedObjectId}"]`).textContent.trim();
+    const groupId = document.getElementById('main-group-select').value; // Получаем ID группы
+
+    document.getElementById('edit-object-name').value = objectName;
+    document.getElementById('edit-object-group-id').value = groupId; // Устанавливаем ID группы
+    document.getElementById('edit-object-form').action = `/object/edit/${selectedObjectId}/`;
+    openModal('edit-object-modal');
+}
     function confirmDeleteInventory() {
         const selectedInventoryId = document.getElementById('main-inventory-select').value;
         if (!selectedInventoryId) {
@@ -316,7 +324,7 @@
             .then(data => {
                 if (data.success) {
                     alert('Инвентарь успешно удален.');
-                    location.reload(); // Обновляем страницу после удаления
+                    location.reload();
                 } else {
                     alert('Произошла ошибка при удалении инвентаря.');
                 }
@@ -351,7 +359,7 @@
             .then(data => {
                 if (data.success) {
                     alert('Группа успешно удалена.');
-                    location.reload(); // Обновляем страницу после удаления
+                    location.reload();
                 } else {
                     alert('Произошла ошибка при удалении группы.');
                 }
