@@ -19,21 +19,18 @@ document.addEventListener('DOMContentLoaded', () => {
         selectElement.innerHTML = '<option value="">Выберите</option>';
         selectElement.disabled = true;
     }
-    document.getElementById('modal-inventory-select').addEventListener('change', function () {
+  document.getElementById('modal-inventory-select').addEventListener('change', function () {
     const inventoryId = this.value;
     const groupSelect = document.getElementById('modal-group-select');
     clearDropdown(groupSelect);
     if (inventoryId) {
         fetch(`/api/groups/?inventory=${inventoryId}`)
             .then(response => response.json())
-            .then(data => populateDropdown(groupSelect, data))
-            .catch(error => {
-                console.error('Ошибка при получении групп:', error.message);
-                alert('Не удалось загрузить список групп.');
-            });
+            .then(data => populateDropdown(groupSelect, data));
     }
 });
-    function updateGroups(inventoryId, groupSelect) {
+
+function updateGroups(inventoryId, groupSelect) {
     if (inventoryId) {
         fetch(`/api/groups/?inventory=${inventoryId}`)
             .then(response => {
@@ -42,32 +39,26 @@ document.addEventListener('DOMContentLoaded', () => {
             })
             .then(data => {
                 populateDropdown(groupSelect, data);
-            })
-            .catch(error => {
-                alert('Не удалось загрузить список групп.');
             });
     } else {
         clearDropdown(groupSelect);
     }
 }
 
-    function updateObjects(groupId, objectSelect) {
-        if (groupId) {
-            fetch(`/api/objects/?group=${groupId}`)
-                .then(response => {
-                    if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
-                    return response.json();
-                })
-                .then(data => {
-                    populateDropdown(objectSelect, data);
-                })
-                .catch(error => {
-                    alert('Не удалось загрузить список объектов.');
-                });
-        } else {
-            clearDropdown(objectSelect);
-        }
+function updateObjects(groupId, objectSelect) {
+    if (groupId) {
+        fetch(`/api/objects/?group=${groupId}`)
+            .then(response => {
+                if (!response.ok) throw new Error(`Ошибка HTTP: ${response.status}`);
+                return response.json();
+            })
+            .then(data => {
+                populateDropdown(objectSelect, data);
+            });
+    } else {
+        clearDropdown(objectSelect);
     }
+}
 
     function updateUrlParams(params) {
         const url = new URL(window.location.href);
@@ -149,7 +140,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
     }
     form.addEventListener('submit', (event) => {
-        event.preventDefault(); // Предотвращаем стандартное поведение submit
+        event.preventDefault();
         const formData = new FormData(form);
         const csrfToken = document.querySelector('[name="csrfmiddlewaretoken"]');
         if (!csrfToken) {
@@ -174,25 +165,25 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(data => {
             console.log('Ответ сервера:', data);
             if (data.success) {
-                closeModal(modalSelector.replace('#', '')); // Закрываем модальное окно
+                closeModal(modalSelector.replace('#', ''));
                 const selectElement = document.getElementById(selectId);
                 if (selectElement) {
                     const newOption = document.createElement('option');
-                    newOption.value = data.id; // Используйте правильный идентификатор
+                    newOption.value = data.id;
                     newOption.textContent = data.name || 'Неизвестный инвентарь';
                     selectElement.appendChild(newOption);
-                    selectElement.value = data.id; // Устанавливаем значение выбранного элемента
+                    selectElement.value = data.id;
                 }
                 if (typeof callback === 'function') {
                     callback();
                 }
             } else {
-                alert('Произошла ошибка при сохранении данных.');
+                console.log('Произошла ошибка при сохранении данных.');
             }
         })
         .catch(error => {
             console.error('Ошибка при сохранении:', error.message);
-            alert('Произошла неожиданная ошибка при сохранении данных.');
+            console.log('Произошла неожиданная ошибка при сохранении данных.');
         });
     });
 }
@@ -267,7 +258,7 @@ document.querySelectorAll('.add-row-btn').forEach(button => {
             const objectId = document.getElementById('main-object-select').value;
 
             if (!objectId) {
-                alert('Выберите объект перед сохранением.');
+                console.log('Выберите объект перед сохранением.');
                 return;
             }
 
@@ -308,14 +299,14 @@ document.querySelectorAll('.add-row-btn').forEach(button => {
                         <button type="button" class="edit-row-btn">✎</button>
                         <button type="button" class="remove-row-btn">×</button>
                     `;
-                    alert('Строка успешно добавлена.');
+                    console.log('Строка успешно добавлена.');
                 } else {
-                    alert('Произошла ошибка при сохранении данных.');
+                    console.log('Произошла ошибка при сохранении данных.');
                 }
             })
             .catch(error => {
                 console.error('Ошибка:', error);
-                alert('Не удалось сохранить строку.');
+                console.log('Не удалось сохранить строку.');
             });
         });
 
@@ -344,15 +335,15 @@ document.querySelector('.save-button').addEventListener('click', () => {
     })
     .then(data => {
         if (data.success) {
-            alert('Данные успешно сохранены.');
+            console.log('Данные успешно сохранены.');
             updateRegulationsAndDefects(formData.object);
         } else {
-            alert('Произошла ошибка при сохранении данных.');
+            console.log('Произошла ошибка при сохранении данных.');
         }
     })
     .catch(error => {
         console.error('Ошибка:', error);
-        alert('Не удалось сохранить данные.');
+        console.log('Не удалось сохранить данные.');
     });
 });
     function updateRegulationsAndDefects(objectId) {
@@ -378,7 +369,7 @@ document.querySelector('.save-button').addEventListener('click', () => {
         })
         .catch(error => {
             console.error('Ошибка при получении регламентов:', error.message);
-            alert('Не удалось загрузить список регламентов.');
+            console.log('Не удалось загрузить список регламентов.');
         });
 
     fetch(`/api/defects/?object=${objectId}`)
@@ -404,7 +395,7 @@ document.querySelector('.save-button').addEventListener('click', () => {
         })
         .catch(error => {
             console.error('Ошибка при получении дефектов:', error.message);
-            alert('Не удалось загрузить список дефектов.');
+            console.log('Не удалось загрузить список дефектов.');
         });
 }
 
@@ -481,7 +472,7 @@ document.addEventListener('click', (event) => {
 
         const objectId = document.getElementById('main-object-select').value;
         if (!objectId) {
-            alert('Выберите объект перед удалением.');
+            console.log('Выберите объект перед удалением.');
             return;
         }
 
@@ -503,15 +494,15 @@ document.addEventListener('click', (event) => {
         })
         .then(data => {
             if (data.success) {
-                alert('Строка успешно удалена.');
+                console.log('Строка успешно удалена.');
                 row.remove();
             } else {
-                alert('Произошла ошибка при удалении данных.');
+                console.log('Произошла ошибка при удалении данных.');
             }
         })
         .catch(error => {
             console.error('Ошибка:', error);
-            alert('Не удалось удалить строку.');
+            console.log('Не удалось удалить строку.');
         });
     }
 });
@@ -521,7 +512,7 @@ function collectFormData() {
     const object = document.getElementById('main-object-select').value;
 
     if (!inventory || !group || !object) {
-        alert('Пожалуйста, выберите инвентарь, группу и объект.');
+        console.log('Пожалуйста, выберите инвентарь, группу и объект.');
         return null;
     }
 
@@ -558,7 +549,7 @@ function saveRowChanges(row, tableId) {
     const cells = row.querySelectorAll('td');
     const rowId = row.dataset.id;
     if (!rowId) {
-        alert('Ошибка: уникальный идентификатор строки отсутствует.');
+        console.log('Ошибка: уникальный идентификатор строки отсутствует.');
         return;
     }
 
@@ -575,7 +566,7 @@ function saveRowChanges(row, tableId) {
 
     const objectId = document.getElementById('main-object-select').value;
     if (!objectId) {
-        alert('Выберите объект перед сохранением изменений.');
+        console.log('Выберите объект перед сохранением изменений.');
         return;
     }
 
@@ -597,14 +588,14 @@ function saveRowChanges(row, tableId) {
     })
     .then(data => {
         if (data.success) {
-            alert('Изменения успешно сохранены.');
+            console.log('Изменения успешно сохранены.');
         } else {
-            alert('Произошла ошибка при сохранении данных.');
+            console.log('Произошла ошибка при сохранении данных.');
         }
     })
     .catch(error => {
         console.error('Ошибка:', error);
-        alert('Не удалось сохранить изменения.');
+        console.log('Не удалось сохранить изменения.');
     });
 }
 

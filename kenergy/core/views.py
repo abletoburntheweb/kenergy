@@ -19,6 +19,8 @@ from .user import (
 )
 
 logger = logging.getLogger(__name__)
+
+
 def login_view(request):
     if request.method == 'POST':
         form = AuthenticationForm(request, data=request.POST)
@@ -35,15 +37,20 @@ def login_view(request):
     else:
         form = AuthenticationForm()
     return render(request, 'core/login.html', {'form': form})
+
+
 @login_required
 def admin_panel(request):
     if not request.user.is_superuser:
         return redirect('system_settings')
     return render(request, 'core/admin_panel.html')
+
+
 @login_required
 def inventory_list(request):
     inventories = Inventory.objects.all()
     return render(request, 'core/inventory_list.html', {'inventories': inventories})
+
 
 @login_required
 def inventory_create(request):
@@ -62,6 +69,7 @@ def inventory_create(request):
                 'errors': form.errors
             }, status=400)
     return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)
+
 
 @login_required
 def inventory_edit(request, pk):
@@ -84,6 +92,7 @@ def inventory_edit(request, pk):
     else:
         form = UserInventoryForm(instance=inventory)
     return render(request, 'core/inventory_edit.html', {'form': form})
+
 
 @csrf_exempt
 @login_required
@@ -115,7 +124,6 @@ def groups_create(request):
         name = request.POST.get('name')
         logger.debug(f"Received POST data: inventory_id={inventory_id}, name={name}")
 
-        # Добавьте логирование для каждого шага
         try:
             inventory = Inventory.objects.get(id_i=inventory_id)
             logger.info(f"Инвентарь найден: id_i={inventory_id}")
@@ -155,9 +163,10 @@ def groups_create(request):
         logger.error("Неверный метод запроса.")
         return JsonResponse({'success': False, 'message': 'Неверный метод запроса.'}, status=405)
 
+
 @login_required
 def groups_edit(request, pk):
-    group = get_object_or_404(Groups, pk=pk)  # Убедитесь, что используется правильная модель
+    group = get_object_or_404(Groups, pk=pk)
     if request.method == 'POST':
         form = UserGroupForm(request.POST, instance=group)
         if form.is_valid():
@@ -165,7 +174,7 @@ def groups_edit(request, pk):
             return JsonResponse({
                 'success': True,
                 'id': group.id_g,
-                'name': group.название  # Используйте поле "название" вместо "name"
+                'name': group.название
             })
         else:
             logger.error(f"Validation errors in UserGroupForm: {form.errors}")
@@ -176,6 +185,7 @@ def groups_edit(request, pk):
     else:
         form = UserGroupForm(instance=group)
     return render(request, 'core/groups_form.html', {'form': form})
+
 
 @csrf_exempt
 @login_required
@@ -192,6 +202,7 @@ def groups_delete(request, pk):
 def object_list(request):
     objects = Object.objects.all()
     return render(request, 'core/object_list.html', {'objects': objects})
+
 
 @login_required
 def object_create(request):
@@ -211,6 +222,7 @@ def object_create(request):
                 'errors': dict(form.errors)
             }, status=400)
     return JsonResponse({'success': False, 'message': 'Invalid request method'}, status=405)
+
 
 @login_required
 def object_edit(request, pk):
@@ -234,6 +246,7 @@ def object_edit(request, pk):
         form = UserObjectForm(instance=obj)
     return render(request, 'core/object_form.html', {'form': form})
 
+
 @csrf_exempt
 @login_required
 def object_delete(request, pk):
@@ -244,10 +257,12 @@ def object_delete(request, pk):
     except Object.DoesNotExist:
         return JsonResponse({'success': False, 'message': 'Объект не найден.'}, status=404)
 
+
 @login_required
 def defects_list(request):
     defects = Tests.objects.all()
     return render(request, 'core/defects_list.html', {'defects': defects})
+
 
 @login_required
 def defects_create(request):
@@ -259,6 +274,7 @@ def defects_create(request):
     else:
         form = UserTestsForm()
     return render(request, 'core/defects_form.html', {'form': form})
+
 
 @login_required
 def defects_edit(request, pk):
@@ -272,6 +288,7 @@ def defects_edit(request, pk):
         form = UserTestsForm(instance=defect)
     return render(request, 'core/defects_form.html', {'form': form})
 
+
 @login_required
 def defects_delete(request, pk):
     defect = get_object_or_404(Tests, pk=pk)
@@ -280,10 +297,12 @@ def defects_delete(request, pk):
         return redirect('defects_list')
     return render(request, 'core/defects_confirm_delete.html', {'defect': defect})
 
+
 @login_required
 def standards_list(request):
     standards = Standards.objects.all()
     return render(request, 'core/standards_list.html', {'standards': standards})
+
 
 @login_required
 def standards_create(request):
@@ -296,6 +315,7 @@ def standards_create(request):
         form = UserStandardsForm()
     return render(request, 'core/standards_form.html', {'form': form})
 
+
 @login_required
 def standards_edit(request, pk):
     standard = get_object_or_404(Standards, pk=pk)
@@ -307,6 +327,7 @@ def standards_edit(request, pk):
     else:
         form = UserStandardsForm(instance=standard)
     return render(request, 'core/standards_form.html', {'form': form})
+
 
 @login_required
 def standards_delete(request, pk):
@@ -332,9 +353,11 @@ def edit_db(request):
     }
     return render(request, 'core/edit_db.html', context)
 
+
 def get_inventories(request):
     inventories = Inventory.objects.all().values('id_i', 'название')
     return JsonResponse(list(inventories), safe=False)
+
 
 def get_groups(request):
     inventory_id = request.GET.get('inventory')
@@ -344,13 +367,18 @@ def get_groups(request):
     groups = GroupsModel.objects.filter(id_i=inventory_id).values('id_g', 'название')
     logger.debug(f"Groups: {list(groups)}")
     return JsonResponse(list(groups), safe=False)
+
+
 def get_objects(request):
     group_id = request.GET.get('group')
     objects = Object.objects.filter(id_g=group_id).values('id_o', 'название')
     return JsonResponse(list(objects), safe=False)
+
+
 @login_required
 def system_settings(request):
     return render(request, 'core/system_settings.html')
+
 
 @login_required
 def save_object(request):
@@ -374,7 +402,8 @@ def save_object(request):
             group = GroupsModel.objects.get(id_g=group_id)
         except (Inventory.DoesNotExist, GroupsModel.DoesNotExist) as e:
             logger.error(f"Ошибка при получении Inventory или Group: {e}")
-            return JsonResponse({'success': False, 'message': f'Ошибка при получении Inventory или Group: {e}'}, status=400)
+            return JsonResponse({'success': False, 'message': f'Ошибка при получении Inventory или Group: {e}'},
+                                status=400)
 
         if object_id:
             obj = Object.objects.get(id_o=object_id)
@@ -389,7 +418,8 @@ def save_object(request):
                 Standards.objects.create(id_o=obj, стандарт=standard, требование=requirement)
 
         for defect, recommendation, metric in zip(defects, recommendations, metrics):
-            existing_defect = Tests.objects.filter(id_o=obj, испытание=defect, рекомендация=recommendation, метрика=float(metric)).first()
+            existing_defect = Tests.objects.filter(id_o=obj, испытание=defect, рекомендация=recommendation,
+                                                   метрика=float(metric)).first()
             if not existing_defect:
                 Tests.objects.create(
                     id_o=obj,
@@ -403,6 +433,7 @@ def save_object(request):
 
     logger.error("Неверный метод запроса.")
     return JsonResponse({'success': False, 'message': 'Неверный метод запроса.'}, status=405)
+
 
 @login_required
 def save_new_row(request):
@@ -436,6 +467,7 @@ def save_new_row(request):
             return JsonResponse({'success': False, 'message': 'Произошла ошибка при сохранении данных.'}, status=500)
 
     return JsonResponse({'success': False, 'message': 'Неверный метод запроса.'}, status=405)
+
 
 @login_required
 def regulations(request):
@@ -489,6 +521,8 @@ def regulations(request):
     }
 
     return render(request, 'core/regulations.html', context)
+
+
 @login_required
 def definition(request):
     inventories = Inventory.objects.all()
@@ -517,6 +551,7 @@ def definition(request):
         'selected_inventory_id': int(selected_inventory_id) if selected_inventory_id else None,
         'selected_group_id': int(selected_group_id) if selected_group_id else None,
     })
+
 
 @login_required
 def defects(request):
@@ -563,6 +598,8 @@ def defects(request):
         'selected_group_id': int(selected_group_id) if selected_group_id else None,
         'selected_object_id': int(selected_object_id) if selected_object_id else None,
     })
+
+
 @login_required
 def get_regulations(request):
     object_id = request.GET.get('object')
@@ -571,6 +608,7 @@ def get_regulations(request):
     regulations = Standards.objects.filter(id_o=object_id).values('id_s', 'стандарт', 'требование')
     return JsonResponse(list(regulations), safe=False)
 
+
 @login_required
 def get_defects(request):
     object_id = request.GET.get('object')
@@ -578,6 +616,7 @@ def get_defects(request):
         return JsonResponse([], safe=False)
     defects = Tests.objects.filter(id_o=object_id).values('id_def', 'испытание', 'рекомендация', 'метрика')
     return JsonResponse(list(defects), safe=False)
+
 
 @login_required
 def update_row(request):
@@ -590,7 +629,8 @@ def update_row(request):
 
             row_id = row_data.get('id')
             if not row_id:
-                return JsonResponse({'success': False, 'message': 'Уникальный идентификатор строки отсутствует.'}, status=400)
+                return JsonResponse({'success': False, 'message': 'Уникальный идентификатор строки отсутствует.'},
+                                    status=400)
 
             if table == 'regulations-table':
                 standard = row_data.get('standard')
@@ -616,6 +656,7 @@ def update_row(request):
 
     return JsonResponse({'success': False, 'message': 'Неверный метод запроса.'}, status=405)
 
+
 @login_required
 def delete_row(request):
     if request.method == 'POST':
@@ -633,7 +674,8 @@ def delete_row(request):
                 defect = row_data.get('defect')
                 recommendation = row_data.get('recommendation')
                 metric = row_data.get('metric')
-                Tests.objects.filter(id_o=object_id, испытание=defect, рекомендация=recommendation, метрика=metric).delete()
+                Tests.objects.filter(id_o=object_id, испытание=defect, рекомендация=recommendation,
+                                     метрика=metric).delete()
 
             return JsonResponse({'success': True, 'message': 'Данные успешно удалены.'})
         except Exception as e:

@@ -262,7 +262,7 @@
     function openEditInventoryModal() {
     const selectedInventoryId = document.getElementById('main-inventory-select').value;
     if (!selectedInventoryId) {
-        alert('Выберите инвентарь для редактирования.');
+        console.log('Выберите инвентарь для редактирования.');
         return;
     }
     const inventoryName = document.querySelector(`#main-inventory-select option[value="${selectedInventoryId}"]`).textContent;
@@ -275,7 +275,7 @@
     function openEditGroupModal() {
     const selectedGroupId = document.getElementById('main-group-select').value;
     if (!selectedGroupId) {
-        alert('Выберите группу для редактирования.');
+        console.log('Выберите группу для редактирования.');
         return;
     }
     const groupName = document.querySelector(`#main-group-select option[value="${selectedGroupId}"]`).textContent.trim();
@@ -290,21 +290,21 @@
     function openEditObjectModal() {
     const selectedObjectId = document.getElementById('main-object-select').value;
     if (!selectedObjectId) {
-        alert('Выберите объект для редактирования.');
+        console.log('Выберите объект для редактирования.');
         return;
     }
     const objectName = document.querySelector(`#main-object-select option[value="${selectedObjectId}"]`).textContent.trim();
-    const groupId = document.getElementById('main-group-select').value; // Получаем ID группы
+    const groupId = document.getElementById('main-group-select').value;
 
     document.getElementById('edit-object-name').value = objectName;
-    document.getElementById('edit-object-group-id').value = groupId; // Устанавливаем ID группы
+    document.getElementById('edit-object-group-id').value = groupId;
     document.getElementById('edit-object-form').action = `/object/edit/${selectedObjectId}/`;
     openModal('edit-object-modal');
 }
     function confirmDeleteInventory() {
         const selectedInventoryId = document.getElementById('main-inventory-select').value;
         if (!selectedInventoryId) {
-            alert('Выберите инвентарь для удаления.');
+            console.log('Выберите инвентарь для удаления.');
             return;
         }
         if (confirm('Вы уверены, что хотите удалить этот инвентарь?')) {
@@ -323,15 +323,15 @@
             })
             .then(data => {
                 if (data.success) {
-                    alert('Инвентарь успешно удален.');
+                    console.log('Инвентарь успешно удален.');
                     location.reload();
                 } else {
-                    alert('Произошла ошибка при удалении инвентаря.');
+                    console.log('Произошла ошибка при удалении инвентаря.');
                 }
             })
             .catch(error => {
                 console.error('Ошибка:', error);
-                alert('Не удалось удалить инвентарь.');
+                console.log('Не удалось удалить инвентарь.');
             });
         }
     }
@@ -339,7 +339,7 @@
     function confirmDeleteGroup() {
         const selectedGroupId = document.getElementById('main-group-select').value;
         if (!selectedGroupId) {
-            alert('Выберите группу для удаления.');
+            console.log('Выберите группу для удаления.');
             return;
         }
         if (confirm('Вы уверены, что хотите удалить эту группу?')) {
@@ -358,15 +358,15 @@
             })
             .then(data => {
                 if (data.success) {
-                    alert('Группа успешно удалена.');
+                    console.log('Группа успешно удалена.');
                     location.reload();
                 } else {
-                    alert('Произошла ошибка при удалении группы.');
+                    console.log('Произошла ошибка при удалении группы.');
                 }
             })
             .catch(error => {
                 console.error('Ошибка:', error);
-                alert('Не удалось удалить группу.');
+                console.log('Не удалось удалить группу.');
             });
         }
     }
@@ -374,7 +374,7 @@
     function confirmDeleteObject() {
         const selectedObjectId = document.getElementById('main-object-select').value;
         if (!selectedObjectId) {
-            alert('Выберите объект для удаления.');
+            console.log('Выберите объект для удаления.');
             return;
         }
         if (confirm('Вы уверены, что хотите удалить этот объект?')) {
@@ -393,15 +393,15 @@
             })
             .then(data => {
                 if (data.success) {
-                    alert('Объект успешно удален.');
+                    console.log('Объект успешно удален.');
                     location.reload();
                 } else {
-                    alert('Произошла ошибка при удалении объекта.');
+                    console.log('Произошла ошибка при удалении объекта.');
                 }
             })
             .catch(error => {
                 console.error('Ошибка:', error);
-                alert('Не удалось удалить объект.');
+                console.log('Не удалось удалить объект.');
             });
         }
     }
